@@ -1,13 +1,18 @@
 package com.bookingapp.common.exception;
 
+import com.bookingapp.domain.exception.BookingConflictException;
 import com.bookingapp.domain.exception.BusinessValidationException;
 import com.bookingapp.domain.exception.EntityNotFoundDomainException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -34,6 +39,14 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, exception.getMessage(), request.getRequestURI());
     }
 
+    @ExceptionHandler(BookingConflictException.class)
+    public ResponseEntity<ApiErrorResponse> handleBookingConflict(
+            BookingConflictException exception,
+            HttpServletRequest request
+    ) {
+        return buildResponse(HttpStatus.CONFLICT, exception.getMessage(), request.getRequestURI());
+    }
+
     @ExceptionHandler(ForbiddenOperationException.class)
     public ResponseEntity<ApiErrorResponse> handleForbiddenOperation(
             ForbiddenOperationException exception,
@@ -45,6 +58,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthenticationCredentialsNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleUnauthorized(
             AuthenticationCredentialsNotFoundException exception,
+            HttpServletRequest request
+    ) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, exception.getMessage(), request.getRequestURI());
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiErrorResponse> handleAuthenticationException(
+            AuthenticationException exception,
             HttpServletRequest request
     ) {
         return buildResponse(HttpStatus.UNAUTHORIZED, exception.getMessage(), request.getRequestURI());
@@ -63,9 +84,36 @@ public class GlobalExceptionHandler {
             MethodArgumentNotValidException exception,
             HttpServletRequest request
     ) {
-        String message = exception.getBindingResult().getFieldErrors().stream()
-                .map(this::formatFieldError)
+        String message = extractFieldErrors(exception.getBindingResult().getFieldErrors());
+        return buildResponse(HttpStatus.BAD_REQUEST, message, request.getRequestURI());
+    }
+
+    @ExceptionHandler(BindException.class)
+    public ResponseEntity<ApiErrorResponse> handleBindException(
+            BindException exception,
+            HttpServletRequest request
+    ) {
+        String message = extractFieldErrors(exception.getBindingResult().getFieldErrors());
+        return buildResponse(HttpStatus.BAD_REQUEST, message, request.getRequestURI());
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiErrorResponse> handleConstraintViolation(
+            ConstraintViolationException exception,
+            HttpServletRequest request
+    ) {
+        String message = exception.getConstraintViolations().stream()
+                .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
                 .collect(Collectors.joining("; "));
+        return buildResponse(HttpStatus.BAD_REQUEST, message, request.getRequestURI());
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ApiErrorResponse> handleMissingRequestParameter(
+            MissingServletRequestParameterException exception,
+            HttpServletRequest request
+    ) {
+        String message = "Required request parameter '%s' is missing".formatted(exception.getParameterName());
         return buildResponse(HttpStatus.BAD_REQUEST, message, request.getRequestURI());
     }
 
@@ -90,5 +138,11 @@ public class GlobalExceptionHandler {
 
     private String formatFieldError(FieldError fieldError) {
         return fieldError.getField() + ": " + fieldError.getDefaultMessage();
+    }
+
+    private String extractFieldErrors(java.util.List<FieldError> fieldErrors) {
+        return fieldErrors.stream()
+                .map(this::formatFieldError)
+                .collect(Collectors.joining("; "));
     }
 }
