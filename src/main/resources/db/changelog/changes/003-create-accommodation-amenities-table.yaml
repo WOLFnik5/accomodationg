@@ -1,0 +1,23 @@
+databaseChangeLog:
+  - changeSet:
+      id: 003-create-accommodation-amenities-table
+      author: codex
+      changes:
+        - createTable:
+            tableName: accommodation_amenities
+            columns:
+              - column:
+                  name: accommodation_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: amenity_order
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: amenity
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false

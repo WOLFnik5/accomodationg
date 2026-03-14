@@ -1,0 +1,84 @@
+databaseChangeLog:
+  - changeSet:
+      id: 006-add-constraints-and-indexes
+      author: codex
+      changes:
+        - addUniqueConstraint:
+            tableName: users
+            columnNames: email
+            constraintName: uk_users_email
+        - addUniqueConstraint:
+            tableName: payments
+            columnNames: session_id
+            constraintName: uk_payments_session_id
+        - addPrimaryKey:
+            tableName: accommodation_amenities
+            columnNames: accommodation_id, amenity_order
+            constraintName: pk_accommodation_amenities
+        - addForeignKeyConstraint:
+            baseTableName: accommodation_amenities
+            baseColumnNames: accommodation_id
+            referencedTableName: accommodations
+            referencedColumnNames: id
+            constraintName: fk_accommodation_amenities_accommodation
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: bookings
+            baseColumnNames: accommodation_id
+            referencedTableName: accommodations
+            referencedColumnNames: id
+            constraintName: fk_bookings_accommodation
+        - addForeignKeyConstraint:
+            baseTableName: bookings
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_bookings_user
+        - addForeignKeyConstraint:
+            baseTableName: payments
+            baseColumnNames: booking_id
+            referencedTableName: bookings
+            referencedColumnNames: id
+            constraintName: fk_payments_booking
+        - createIndex:
+            tableName: users
+            indexName: idx_users_email
+            columns:
+              - column:
+                  name: email
+        - createIndex:
+            tableName: bookings
+            indexName: idx_bookings_accommodation_id
+            columns:
+              - column:
+                  name: accommodation_id
+        - createIndex:
+            tableName: bookings
+            indexName: idx_bookings_user_id
+            columns:
+              - column:
+                  name: user_id
+        - createIndex:
+            tableName: bookings
+            indexName: idx_bookings_status
+            columns:
+              - column:
+                  name: status
+        - createIndex:
+            tableName: bookings
+            indexName: idx_bookings_checkout_date
+            columns:
+              - column:
+                  name: check_out_date
+        - createIndex:
+            tableName: payments
+            indexName: idx_payments_booking_id
+            columns:
+              - column:
+                  name: booking_id
+        - createIndex:
+            tableName: payments
+            indexName: idx_payments_session_id
+            columns:
+              - column:
+                  name: session_id

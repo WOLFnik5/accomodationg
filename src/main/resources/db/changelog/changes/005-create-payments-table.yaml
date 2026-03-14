@@ -1,0 +1,37 @@
+databaseChangeLog:
+  - changeSet:
+      id: 005-create-payments-table
+      author: codex
+      changes:
+        - createTable:
+            tableName: payments
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_payments
+                    nullable: false
+              - column:
+                  name: status
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: booking_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: session_url
+                  type: TEXT
+              - column:
+                  name: session_id
+                  type: VARCHAR(255)
+              - column:
+                  name: amount_to_pay
+                  type: NUMERIC(12,2)
+                  constraints:
+                    nullable: false
