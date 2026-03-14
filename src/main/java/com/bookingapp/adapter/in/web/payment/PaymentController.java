@@ -72,7 +72,7 @@ public class PaymentController {
     }
 
     @GetMapping("/success")
-    @Operation(summary = "Handle successful payment callback", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "Handle successful payment callback")
     public PaymentSuccessResponse handlePaymentSuccess(
             @RequestParam(name = "session_id") String sessionId
     ) {
@@ -81,7 +81,7 @@ public class PaymentController {
     }
 
     @GetMapping("/cancel")
-    @Operation(summary = "Handle canceled payment callback", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "Handle canceled payment callback")
     public PaymentCancelResponse handlePaymentCancel(
             @RequestParam(name = "session_id") String sessionId
     ) {
