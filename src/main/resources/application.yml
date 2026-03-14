@@ -23,9 +23,6 @@ spring:
     consumer:
       group-id: ${KAFKA_CONSUMER_GROUP_ID:booking-app}
       auto-offset-reset: earliest
-  jackson:
-    serialization:
-      write-dates-as-timestamps: false
 
 server:
   port: ${SERVER_PORT:8080}
