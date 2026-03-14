@@ -84,7 +84,7 @@ public class PaymentApplicationService implements
         User bookingOwner = getUser(booking.getUserId());
 
         BigDecimal totalAmount = calculateTotalAmount(booking, accommodation);
-        Payment pendingPayment = Payment.createPending(booking.getId(), totalAmount);
+        Payment pendingPayment = preparePaymentForCheckout(booking.getId(), totalAmount);
         PaymentSession providerSession = paymentProviderPort.createPaymentSession(
                 pendingPayment,
                 booking,
@@ -99,7 +99,9 @@ public class PaymentApplicationService implements
                 savedPayment.getSessionId(),
                 savedPayment.getSessionUrl(),
                 savedPayment.getId(),
-                savedPayment.getStatus().name()
+                savedPayment.getStatus().name(),
+                savedPayment.getBookingId(),
+                savedPayment.getAmountToPay()
         );
     }
 
@@ -165,6 +167,26 @@ public class PaymentApplicationService implements
             throw new BusinessValidationException("Booking must contain at least one payable day");
         }
         return accommodation.getDailyRate().multiply(BigDecimal.valueOf(bookedDays));
+    }
+
+    private Payment preparePaymentForCheckout(Long bookingId, BigDecimal totalAmount) {
+        Payment existingPayment = paymentRepositoryPort.findByBookingId(bookingId).orElse(null);
+        if (existingPayment == null) {
+            return Payment.createPending(bookingId, totalAmount);
+        }
+
+        if (existingPayment.getStatus() == PaymentStatus.PAID) {
+            throw new PaymentStateException("Payment for booking id '" + bookingId + "' has already been completed");
+        }
+
+        return new Payment(
+                existingPayment.getId(),
+                PaymentStatus.PENDING,
+                bookingId,
+                null,
+                null,
+                totalAmount
+        );
     }
 
     private void ensureCurrentUserCanAccessBooking(Booking booking) {

@@ -52,7 +52,9 @@ public class StripePaymentProviderAdapter implements PaymentProviderPort {
                     session.getId(),
                     session.getUrl(),
                     payment.getId(),
-                    payment.getStatus().name()
+                    payment.getStatus().name(),
+                    payment.getBookingId(),
+                    payment.getAmountToPay()
             );
         } catch (StripeException exception) {
             throw new PaymentStateException("Failed to create Stripe checkout session");
