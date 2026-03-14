@@ -1,0 +1,16 @@
+spring:
+  kafka:
+    listener:
+      auto-startup: false
+  task:
+    scheduling:
+      enabled: false
+
+app:
+  stripe:
+    secret-key: sk_test_integration
+    success-url: http://localhost/payments/success
+    cancel-url: http://localhost/payments/cancel
+  telegram:
+    bot-token: test-bot-token
+    chat-id: test-chat-id

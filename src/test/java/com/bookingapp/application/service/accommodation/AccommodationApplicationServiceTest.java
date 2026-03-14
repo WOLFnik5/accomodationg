@@ -8,7 +8,6 @@ import com.bookingapp.domain.enums.AccommodationType;
 import com.bookingapp.domain.model.Accommodation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
