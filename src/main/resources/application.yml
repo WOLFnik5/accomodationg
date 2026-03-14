@@ -66,3 +66,6 @@ app:
   telegram:
     bot-token: ${TELEGRAM_BOT_TOKEN:replace-with-bot-token}
     chat-id: ${TELEGRAM_CHAT_ID:replace-with-chat-id}
+  scheduler:
+    booking-expiration:
+      cron: ${BOOKING_EXPIRATION_CRON:0 0 1 * * *}
