@@ -64,6 +64,21 @@ class PaymentControllerTest {
     }
 
     @Test
+    void handlePaymentSuccessShouldBeAccessibleWithoutAuthentication() throws Exception {
+        when(handlePaymentSuccessUseCase.handlePaymentSuccess("sess_public")).thenReturn(
+                new Payment(101L, PaymentStatus.PAID, 12L, "https://checkout.example/sess_public", "sess_public", BigDecimal.valueOf(320))
+        );
+
+        mockMvc.perform(get("/payments/success")
+                        .param("session_id", "sess_public"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("Payment completed successfully."))
+                .andExpect(jsonPath("$.payment.sessionId").value("sess_public"))
+                .andExpect(jsonPath("$.payment.status").value("PAID"));
+    }
+
+    @Test
     void createPaymentShouldReturnPaymentSessionJson() throws Exception {
         when(createPaymentSessionUseCase.createPaymentSession(any())).thenReturn(
                 new PaymentSession(
