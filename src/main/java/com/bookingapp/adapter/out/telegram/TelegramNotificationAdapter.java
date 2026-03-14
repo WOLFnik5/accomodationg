@@ -21,32 +21,37 @@ public class TelegramNotificationAdapter implements NotificationPort {
     }
 
     @Override
+    public void sendMessage(String message) {
+        telegramBotClient.sendMessage(message);
+    }
+
+    @Override
     public void notifyAccommodationCreated(Accommodation accommodation) {
-        telegramBotClient.sendMessage(telegramMessageFormatter.formatAccommodationCreated(accommodation));
+        sendMessage(telegramMessageFormatter.formatAccommodationCreated(accommodation));
     }
 
     @Override
     public void notifyBookingCreated(Booking booking) {
-        telegramBotClient.sendMessage(telegramMessageFormatter.formatBookingCreated(booking));
+        sendMessage(telegramMessageFormatter.formatBookingCreated(booking));
     }
 
     @Override
     public void notifyBookingCanceled(Booking booking) {
-        telegramBotClient.sendMessage(telegramMessageFormatter.formatBookingCanceled(booking));
+        sendMessage(telegramMessageFormatter.formatBookingCanceled(booking));
     }
 
     @Override
     public void notifyAccommodationReleased(Booking booking, Accommodation accommodation) {
-        telegramBotClient.sendMessage(telegramMessageFormatter.formatAccommodationReleased(booking, accommodation));
+        sendMessage(telegramMessageFormatter.formatAccommodationReleased(booking, accommodation));
     }
 
     @Override
     public void notifyPaymentSuccessful(Payment payment) {
-        telegramBotClient.sendMessage(telegramMessageFormatter.formatPaymentSuccessful(payment));
+        sendMessage(telegramMessageFormatter.formatPaymentSuccessful(payment));
     }
 
     @Override
     public void notifyNoExpiredBookingsToday() {
-        telegramBotClient.sendMessage("No expired bookings today!");
+        sendMessage("No expired bookings today!");
     }
 }

@@ -6,6 +6,8 @@ import com.bookingapp.domain.model.Payment;
 
 public interface NotificationPort {
 
+    void sendMessage(String message);
+
     void notifyAccommodationCreated(Accommodation accommodation);
 
     void notifyBookingCreated(Booking booking);

@@ -1,4 +1,4 @@
-package com.bookingapp.adapter.out.kafka.event;
+package com.bookingapp.application.model.event;
 
 import java.time.Instant;
 import java.time.LocalDate;

@@ -1,12 +1,11 @@
 package com.bookingapp.adapter.in.kafka;
 
-import com.bookingapp.adapter.out.kafka.event.AccommodationCreatedEvent;
-import com.bookingapp.adapter.out.kafka.event.BookingCanceledEvent;
-import com.bookingapp.adapter.out.kafka.event.BookingCreatedEvent;
-import com.bookingapp.adapter.out.kafka.event.BookingExpiredEvent;
-import com.bookingapp.adapter.out.kafka.event.PaymentSucceededEvent;
-import com.bookingapp.adapter.out.telegram.TelegramBotClient;
-import com.bookingapp.adapter.out.telegram.TelegramMessageFormatter;
+import com.bookingapp.application.model.event.AccommodationCreatedEvent;
+import com.bookingapp.application.model.event.BookingCanceledEvent;
+import com.bookingapp.application.model.event.BookingCreatedEvent;
+import com.bookingapp.application.model.event.BookingExpiredEvent;
+import com.bookingapp.application.model.event.PaymentSucceededEvent;
+import com.bookingapp.application.port.in.notification.SendNotificationUseCase;
 import com.bookingapp.infrastructure.config.KafkaTopicsProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,20 +16,18 @@ import org.springframework.stereotype.Component;
 public class TelegramEventConsumer {
 
     private final ObjectMapper objectMapper;
-    private final TelegramBotClient telegramBotClient;
-    private final TelegramMessageFormatter telegramMessageFormatter;
-    private final KafkaTopicsProperties kafkaTopicsProperties;
+    private final TelegramKafkaMessageFormatter telegramKafkaMessageFormatter;
+    private final SendNotificationUseCase sendNotificationUseCase;
 
     public TelegramEventConsumer(
             ObjectMapper objectMapper,
-            TelegramBotClient telegramBotClient,
-            TelegramMessageFormatter telegramMessageFormatter,
+            TelegramKafkaMessageFormatter telegramKafkaMessageFormatter,
+            SendNotificationUseCase sendNotificationUseCase,
             KafkaTopicsProperties kafkaTopicsProperties
     ) {
         this.objectMapper = objectMapper;
-        this.telegramBotClient = telegramBotClient;
-        this.telegramMessageFormatter = telegramMessageFormatter;
-        this.kafkaTopicsProperties = kafkaTopicsProperties;
+        this.telegramKafkaMessageFormatter = telegramKafkaMessageFormatter;
+        this.sendNotificationUseCase = sendNotificationUseCase;
     }
 
     @KafkaListener(
@@ -40,7 +37,7 @@ public class TelegramEventConsumer {
     )
     public void consumeBookingCreated(String payload) {
         BookingCreatedEvent event = readValue(payload, BookingCreatedEvent.class);
-        telegramBotClient.sendMessage(telegramMessageFormatter.formatBookingCreatedEvent(event));
+        sendNotificationUseCase.sendMessage(telegramKafkaMessageFormatter.formatBookingCreatedEvent(event));
     }
 
     @KafkaListener(
@@ -50,7 +47,7 @@ public class TelegramEventConsumer {
     )
     public void consumeBookingCanceled(String payload) {
         BookingCanceledEvent event = readValue(payload, BookingCanceledEvent.class);
-        telegramBotClient.sendMessage(telegramMessageFormatter.formatBookingCanceledEvent(event));
+        sendNotificationUseCase.sendMessage(telegramKafkaMessageFormatter.formatBookingCanceledEvent(event));
     }
 
     @KafkaListener(
@@ -60,7 +57,7 @@ public class TelegramEventConsumer {
     )
     public void consumeAccommodationCreated(String payload) {
         AccommodationCreatedEvent event = readValue(payload, AccommodationCreatedEvent.class);
-        telegramBotClient.sendMessage(telegramMessageFormatter.formatAccommodationCreatedEvent(event));
+        sendNotificationUseCase.sendMessage(telegramKafkaMessageFormatter.formatAccommodationCreatedEvent(event));
     }
 
     @KafkaListener(
@@ -70,7 +67,7 @@ public class TelegramEventConsumer {
     )
     public void consumePaymentSucceeded(String payload) {
         PaymentSucceededEvent event = readValue(payload, PaymentSucceededEvent.class);
-        telegramBotClient.sendMessage(telegramMessageFormatter.formatPaymentSucceededEvent(event));
+        sendNotificationUseCase.sendMessage(telegramKafkaMessageFormatter.formatPaymentSucceededEvent(event));
     }
 
     @KafkaListener(
@@ -80,7 +77,7 @@ public class TelegramEventConsumer {
     )
     public void consumeBookingExpired(String payload) {
         BookingExpiredEvent event = readValue(payload, BookingExpiredEvent.class);
-        telegramBotClient.sendMessage(telegramMessageFormatter.formatBookingExpiredEvent(event));
+        sendNotificationUseCase.sendMessage(telegramKafkaMessageFormatter.formatBookingExpiredEvent(event));
     }
 
     private <T> T readValue(String payload, Class<T> targetType) {

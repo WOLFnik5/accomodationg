@@ -1,10 +1,10 @@
 package com.bookingapp.adapter.out.kafka;
 
-import com.bookingapp.adapter.out.kafka.event.AccommodationCreatedEvent;
-import com.bookingapp.adapter.out.kafka.event.BookingCanceledEvent;
-import com.bookingapp.adapter.out.kafka.event.BookingCreatedEvent;
-import com.bookingapp.adapter.out.kafka.event.BookingExpiredEvent;
-import com.bookingapp.adapter.out.kafka.event.PaymentSucceededEvent;
+import com.bookingapp.application.model.event.AccommodationCreatedEvent;
+import com.bookingapp.application.model.event.BookingCanceledEvent;
+import com.bookingapp.application.model.event.BookingCreatedEvent;
+import com.bookingapp.application.model.event.BookingExpiredEvent;
+import com.bookingapp.application.model.event.PaymentSucceededEvent;
 import com.bookingapp.application.port.out.integration.EventPublisherPort;
 import com.bookingapp.domain.model.Accommodation;
 import com.bookingapp.domain.model.Booking;
