@@ -11,7 +11,6 @@ import com.bookingapp.application.port.in.booking.ListBookingsUseCase;
 import com.bookingapp.application.port.in.booking.ListMyBookingsUseCase;
 import com.bookingapp.application.port.in.booking.UpdateBookingUseCase;
 import com.bookingapp.application.port.out.integration.EventPublisherPort;
-import com.bookingapp.application.port.out.integration.NotificationPort;
 import com.bookingapp.application.port.out.persistence.AccommodationRepositoryPort;
 import com.bookingapp.application.port.out.persistence.BookingRepositoryPort;
 import com.bookingapp.application.port.out.persistence.PaymentRepositoryPort;
@@ -47,22 +46,19 @@ public class BookingApplicationService implements
     private final PaymentRepositoryPort paymentRepositoryPort;
     private final CurrentUserProviderPort currentUserProviderPort;
     private final EventPublisherPort eventPublisherPort;
-    private final NotificationPort notificationPort;
 
     public BookingApplicationService(
             BookingRepositoryPort bookingRepositoryPort,
             AccommodationRepositoryPort accommodationRepositoryPort,
             PaymentRepositoryPort paymentRepositoryPort,
             CurrentUserProviderPort currentUserProviderPort,
-            EventPublisherPort eventPublisherPort,
-            NotificationPort notificationPort
+            EventPublisherPort eventPublisherPort
     ) {
         this.bookingRepositoryPort = bookingRepositoryPort;
         this.accommodationRepositoryPort = accommodationRepositoryPort;
         this.paymentRepositoryPort = paymentRepositoryPort;
         this.currentUserProviderPort = currentUserProviderPort;
         this.eventPublisherPort = eventPublisherPort;
-        this.notificationPort = notificationPort;
     }
 
     @Override
@@ -90,7 +86,6 @@ public class BookingApplicationService implements
 
         Booking savedBooking = bookingRepositoryPort.save(bookingToSave);
         eventPublisherPort.publishBookingCreated(savedBooking);
-        notificationPort.notifyBookingCreated(savedBooking);
         return savedBooking;
     }
 
@@ -156,7 +151,6 @@ public class BookingApplicationService implements
         Booking canceledBooking = existingBooking.cancel();
         Booking savedBooking = bookingRepositoryPort.save(canceledBooking);
         eventPublisherPort.publishBookingCanceled(savedBooking);
-        notificationPort.notifyBookingCanceled(savedBooking);
         return savedBooking;
     }
 

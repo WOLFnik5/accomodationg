@@ -10,7 +10,6 @@ import com.bookingapp.application.port.in.payment.GetPaymentsUseCase;
 import com.bookingapp.application.port.in.payment.HandlePaymentCancelUseCase;
 import com.bookingapp.application.port.in.payment.HandlePaymentSuccessUseCase;
 import com.bookingapp.application.port.out.integration.EventPublisherPort;
-import com.bookingapp.application.port.out.integration.NotificationPort;
 import com.bookingapp.application.port.out.integration.PaymentProviderPort;
 import com.bookingapp.application.port.out.persistence.AccommodationRepositoryPort;
 import com.bookingapp.application.port.out.persistence.BookingRepositoryPort;
@@ -49,7 +48,6 @@ public class PaymentApplicationService implements
     private final CurrentUserProviderPort currentUserProviderPort;
     private final PaymentProviderPort paymentProviderPort;
     private final EventPublisherPort eventPublisherPort;
-    private final NotificationPort notificationPort;
 
     public PaymentApplicationService(
             PaymentRepositoryPort paymentRepositoryPort,
@@ -58,8 +56,7 @@ public class PaymentApplicationService implements
             UserRepositoryPort userRepositoryPort,
             CurrentUserProviderPort currentUserProviderPort,
             PaymentProviderPort paymentProviderPort,
-            EventPublisherPort eventPublisherPort,
-            NotificationPort notificationPort
+            EventPublisherPort eventPublisherPort
     ) {
         this.paymentRepositoryPort = paymentRepositoryPort;
         this.bookingRepositoryPort = bookingRepositoryPort;
@@ -68,7 +65,6 @@ public class PaymentApplicationService implements
         this.currentUserProviderPort = currentUserProviderPort;
         this.paymentProviderPort = paymentProviderPort;
         this.eventPublisherPort = eventPublisherPort;
-        this.notificationPort = notificationPort;
     }
 
     @Override
@@ -128,7 +124,6 @@ public class PaymentApplicationService implements
 
         Payment savedPayment = paymentRepositoryPort.save(payment.markPaid());
         eventPublisherPort.publishPaymentSucceeded(savedPayment);
-        notificationPort.notifyPaymentSuccessful(savedPayment);
         return savedPayment;
     }
 

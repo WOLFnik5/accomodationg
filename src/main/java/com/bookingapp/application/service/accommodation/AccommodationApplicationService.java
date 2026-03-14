@@ -8,7 +8,6 @@ import com.bookingapp.application.port.in.accommodation.GetAccommodationByIdUseC
 import com.bookingapp.application.port.in.accommodation.ListAccommodationsUseCase;
 import com.bookingapp.application.port.in.accommodation.UpdateAccommodationUseCase;
 import com.bookingapp.application.port.out.integration.EventPublisherPort;
-import com.bookingapp.application.port.out.integration.NotificationPort;
 import com.bookingapp.application.port.out.persistence.AccommodationRepositoryPort;
 import com.bookingapp.domain.exception.BusinessValidationException;
 import com.bookingapp.domain.exception.EntityNotFoundDomainException;
@@ -29,16 +28,13 @@ public class AccommodationApplicationService implements
 
     private final AccommodationRepositoryPort accommodationRepositoryPort;
     private final EventPublisherPort eventPublisherPort;
-    private final NotificationPort notificationPort;
 
     public AccommodationApplicationService(
             AccommodationRepositoryPort accommodationRepositoryPort,
-            EventPublisherPort eventPublisherPort,
-            NotificationPort notificationPort
+            EventPublisherPort eventPublisherPort
     ) {
         this.accommodationRepositoryPort = accommodationRepositoryPort;
         this.eventPublisherPort = eventPublisherPort;
-        this.notificationPort = notificationPort;
     }
 
     @Override
@@ -59,7 +55,6 @@ public class AccommodationApplicationService implements
 
         Accommodation savedAccommodation = accommodationRepositoryPort.save(accommodationToSave);
         eventPublisherPort.publishAccommodationCreated(savedAccommodation);
-        notificationPort.notifyAccommodationCreated(savedAccommodation);
         return savedAccommodation;
     }
 
