@@ -3,6 +3,8 @@ package com.bookingapp.adapter.out.kafka;
 import com.bookingapp.adapter.out.persistence.outbox.OutboxEventEntity;
 import com.bookingapp.adapter.out.persistence.outbox.OutboxEventJpaRepository;
 import com.bookingapp.adapter.out.persistence.outbox.OutboxStatus;
+import com.bookingapp.infrastructure.config.OutboxProperties;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -11,15 +13,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class OutboxKafkaPublisher {
+    private static final int ERROR_MESSAGE_MAX_LENGTH = 2000;
+
     private final OutboxEventJpaRepository outboxEventJpaRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
+    private final OutboxProperties outboxProperties;
 
     public OutboxKafkaPublisher(
             OutboxEventJpaRepository outboxEventJpaRepository,
-            KafkaTemplate<String, String> kafkaTemplate
+            KafkaTemplate<String, String> kafkaTemplate,
+            OutboxProperties outboxProperties
     ) {
         this.outboxEventJpaRepository = outboxEventJpaRepository;
         this.kafkaTemplate = kafkaTemplate;
+        this.outboxProperties = outboxProperties;
     }
 
     @Scheduled(fixedDelayString = "${app.outbox.publish-fixed-delay-ms:5000}")
@@ -29,11 +36,30 @@ public class OutboxKafkaPublisher {
                 .findTop100ByStatusInOrderByCreatedAtAsc(List.of(OutboxStatus.NEW, OutboxStatus.FAILED));
 
         for (OutboxEventEntity event : events) {
-            try {
-                kafkaTemplate.send(event.getTopic(), event.getEventKey(), event.getPayload()).join();
-                event.markSent();
-            } catch (Exception exception) {
-                event.markFailed(truncate(exception.getMessage(), 2000));
+            publishSingleEvent(event);
+        }
+    }
+
+    @Scheduled(cron = "${app.outbox.cleanup-cron:0 0 3 * * *}")
+    @Transactional
+    public void cleanupSentEvents() {
+        LocalDateTime threshold = LocalDateTime.now().minusDays(outboxProperties.sentRetentionDays());
+        outboxEventJpaRepository.deleteByStatusAndPublishedAtBefore(OutboxStatus.SENT, threshold);
+    }
+
+    private void publishSingleEvent(OutboxEventEntity event) {
+        try {
+            kafkaTemplate.send(event.getTopic(), event.getEventKey(), event.getPayload()).join();
+            event.markSent();
+        } catch (Exception exception) {
+            event.incrementAttempts();
+
+            String errorMessage = truncate(exception.getMessage(), ERROR_MESSAGE_MAX_LENGTH);
+
+            if (event.getAttempts() >= outboxProperties.maxAttempts()) {
+                event.markDead(errorMessage);
+            } else {
+                event.markFailed(errorMessage);
             }
         }
     }

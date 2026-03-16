@@ -104,6 +104,10 @@ public class OutboxEventEntity {
         );
     }
 
+    public void incrementAttempts() {
+        this.attempts++;
+    }
+
     public void markSent() {
         this.status = OutboxStatus.SENT;
         this.publishedAt = LocalDateTime.now();
@@ -112,7 +116,11 @@ public class OutboxEventEntity {
 
     public void markFailed(String errorMessage) {
         this.status = OutboxStatus.FAILED;
-        this.attempts++;
+        this.lastError = errorMessage;
+    }
+
+    public void markDead(String errorMessage) {
+        this.status = OutboxStatus.DEAD;
         this.lastError = errorMessage;
     }
 
