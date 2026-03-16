@@ -44,6 +44,8 @@ springdoc:
     path: /swagger-ui.html
 
 app:
+  outbox:
+    publish-fixed-delay-ms: 5000
   security:
     jwt:
       secret: ${JWT_SECRET:VGhpc0lzQVN0cm9uZ0Jhc2U2NFNlY3JldEZvckpXVFRva2VuU2lnbmluZzEyMw==}

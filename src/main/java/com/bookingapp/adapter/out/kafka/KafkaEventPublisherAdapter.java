@@ -1,5 +1,7 @@
 package com.bookingapp.adapter.out.kafka;
 
+import com.bookingapp.adapter.out.persistence.outbox.OutboxEventEntity;
+import com.bookingapp.adapter.out.persistence.outbox.OutboxEventJpaRepository;
 import com.bookingapp.application.model.event.AccommodationCreatedEvent;
 import com.bookingapp.application.model.event.BookingCanceledEvent;
 import com.bookingapp.application.model.event.BookingCreatedEvent;
@@ -10,28 +12,33 @@ import com.bookingapp.domain.model.Accommodation;
 import com.bookingapp.domain.model.Booking;
 import com.bookingapp.domain.model.Payment;
 import com.bookingapp.infrastructure.config.KafkaTopicsProperties;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Component;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
+import org.springframework.stereotype.Component;
 
 @Component
 public class KafkaEventPublisherAdapter implements EventPublisherPort {
-
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final OutboxEventJpaRepository outboxEventJpaRepository;
     private final KafkaTopicsProperties kafkaTopicsProperties;
+    private final ObjectMapper objectMapper;
 
     public KafkaEventPublisherAdapter(
-            KafkaTemplate<String, Object> kafkaTemplate,
-            KafkaTopicsProperties kafkaTopicsProperties
+            OutboxEventJpaRepository outboxEventJpaRepository,
+            KafkaTopicsProperties kafkaTopicsProperties,
+            ObjectMapper objectMapper
     ) {
-        this.kafkaTemplate = kafkaTemplate;
+        this.outboxEventJpaRepository = outboxEventJpaRepository;
         this.kafkaTopicsProperties = kafkaTopicsProperties;
+        this.objectMapper = objectMapper;
     }
 
     @Override
     public void publishAccommodationCreated(Accommodation accommodation) {
-        kafkaTemplate.send(
+        saveOutboxEvent(
+                "Accommodation",
+                accommodation.getId(),
+                "AccommodationCreatedEvent",
                 kafkaTopicsProperties.getAccommodationCreated(),
                 buildKey(accommodation.getId()),
                 new AccommodationCreatedEvent(
@@ -47,7 +54,10 @@ public class KafkaEventPublisherAdapter implements EventPublisherPort {
 
     @Override
     public void publishBookingCreated(Booking booking) {
-        kafkaTemplate.send(
+        saveOutboxEvent(
+                "Booking",
+                booking.getId(),
+                "BookingCreatedEvent",
                 kafkaTopicsProperties.getBookingCreated(),
                 buildKey(booking.getId()),
                 new BookingCreatedEvent(
@@ -64,7 +74,10 @@ public class KafkaEventPublisherAdapter implements EventPublisherPort {
 
     @Override
     public void publishBookingCanceled(Booking booking) {
-        kafkaTemplate.send(
+        saveOutboxEvent(
+                "Booking",
+                booking.getId(),
+                "BookingCanceledEvent",
                 kafkaTopicsProperties.getBookingCanceled(),
                 buildKey(booking.getId()),
                 new BookingCanceledEvent(
@@ -78,7 +91,10 @@ public class KafkaEventPublisherAdapter implements EventPublisherPort {
 
     @Override
     public void publishBookingExpired(Booking booking) {
-        kafkaTemplate.send(
+        saveOutboxEvent(
+                "Booking",
+                booking.getId(),
+                "BookingExpiredEvent",
                 kafkaTopicsProperties.getBookingExpired(),
                 buildKey(booking.getId()),
                 new BookingExpiredEvent(
@@ -92,7 +108,10 @@ public class KafkaEventPublisherAdapter implements EventPublisherPort {
 
     @Override
     public void publishPaymentSucceeded(Payment payment) {
-        kafkaTemplate.send(
+        saveOutboxEvent(
+                "Payment",
+                payment.getId(),
+                "PaymentSucceededEvent",
                 kafkaTopicsProperties.getPaymentSucceeded(),
                 buildKey(payment.getId()),
                 new PaymentSucceededEvent(
@@ -103,6 +122,32 @@ public class KafkaEventPublisherAdapter implements EventPublisherPort {
                         Instant.now()
                 )
         );
+    }
+
+    private void saveOutboxEvent(
+            String aggregateType,
+            Long aggregateId,
+            String eventType,
+            String topic,
+            String eventKey,
+            Object payloadObject
+    ) {
+        try {
+            String payload = objectMapper.writeValueAsString(payloadObject);
+
+            outboxEventJpaRepository.save(
+                    OutboxEventEntity.newEvent(
+                            aggregateType,
+                            aggregateId,
+                            eventType,
+                            topic,
+                            eventKey,
+                            payload
+                    )
+            );
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Failed to serialize outbox payload for " + eventType, e);
+        }
     }
 
     private String buildKey(Long id) {
