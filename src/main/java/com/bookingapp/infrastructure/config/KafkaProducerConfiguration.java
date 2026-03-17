@@ -18,7 +18,7 @@ import java.util.Map;
 public class KafkaProducerConfiguration {
 
     @Bean
-    public ProducerFactory<String, Object> producerFactory(
+    public ProducerFactory<String, String> producerFactory(
             @Value("${spring.kafka.bootstrap-servers}") String bootstrapServers
     ) {
         Map<String, Object> properties = new HashMap<>();
@@ -30,7 +30,7 @@ public class KafkaProducerConfiguration {
     }
 
     @Bean
-    public KafkaTemplate<String, Object> kafkaTemplate(ProducerFactory<String, Object> producerFactory) {
+    public KafkaTemplate<String, String> kafkaTemplate(ProducerFactory<String, String> producerFactory) {
         return new KafkaTemplate<>(producerFactory);
     }
 }

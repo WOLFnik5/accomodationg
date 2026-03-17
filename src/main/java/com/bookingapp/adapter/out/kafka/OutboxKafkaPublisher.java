@@ -54,7 +54,11 @@ public class OutboxKafkaPublisher {
         } catch (Exception exception) {
             event.incrementAttempts();
 
-            String errorMessage = truncate(exception.getMessage(), ERROR_MESSAGE_MAX_LENGTH);
+            Throwable cause = exception;
+            if (exception instanceof java.util.concurrent.CompletionException && exception.getCause() != null) {
+                cause = exception.getCause();
+            }
+            String errorMessage = truncate(cause.getMessage(), ERROR_MESSAGE_MAX_LENGTH);
 
             if (event.getAttempts() >= outboxProperties.maxAttempts()) {
                 event.markDead(errorMessage);

@@ -8,9 +8,11 @@ import com.bookingapp.application.model.event.PaymentSucceededEvent;
 import com.bookingapp.application.port.in.notification.SendNotificationUseCase;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+@Profile("!test")
 @Component
 public class TelegramEventConsumer {
     private final ObjectMapper objectMapper;

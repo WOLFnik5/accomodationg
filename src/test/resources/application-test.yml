@@ -12,6 +12,9 @@ spring:
       enabled: false
 
 app:
+  outbox:
+    publisher:
+      enabled: false
   stripe:
     secret-key: sk_test_integration
     success-url: http://localhost/payments/success
