@@ -1,7 +1,7 @@
 package com.bookingapp.application.port.in.auth;
 
-import com.bookingapp.application.model.AuthenticationResult;
-import com.bookingapp.application.model.LoginCommand;
+import com.bookingapp.application.dto.AuthenticationResult;
+import com.bookingapp.application.dto.LoginCommand;
 
 public interface LoginUseCase {
 

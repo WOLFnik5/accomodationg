@@ -1,7 +1,8 @@
 package com.bookingapp.adapter.in.web.payment;
 
+import com.bookingapp.adapter.in.web.dto.CreatePaymentRequest;
 import com.bookingapp.adapter.in.web.support.AbstractControllerIntegrationTest;
-import com.bookingapp.application.model.PaymentSession;
+import com.bookingapp.application.dto.PaymentSession;
 import com.bookingapp.domain.enums.AccommodationType;
 import com.bookingapp.domain.enums.BookingStatus;
 import com.bookingapp.domain.enums.PaymentStatus;

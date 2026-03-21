@@ -2,7 +2,7 @@ package com.bookingapp.adapter.out.persistence;
 
 import com.bookingapp.adapter.out.persistence.mapper.PaymentPersistenceMapper;
 import com.bookingapp.adapter.out.persistence.repository.JpaPaymentRepository;
-import com.bookingapp.application.model.PaymentFilterQuery;
+import com.bookingapp.application.dto.PaymentFilterQuery;
 import com.bookingapp.application.port.out.persistence.PaymentRepositoryPort;
 import com.bookingapp.domain.model.Payment;
 import org.springframework.stereotype.Component;

@@ -1,6 +1,6 @@
 package com.bookingapp.adapter.out.stripe;
 
-import com.bookingapp.application.model.PaymentSession;
+import com.bookingapp.application.dto.PaymentSession;
 import com.bookingapp.application.port.out.integration.PaymentProviderPort;
 import com.bookingapp.domain.exception.PaymentStateException;
 import com.bookingapp.domain.model.Accommodation;

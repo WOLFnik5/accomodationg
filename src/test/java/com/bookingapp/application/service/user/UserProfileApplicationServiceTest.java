@@ -1,9 +1,10 @@
 package com.bookingapp.application.service.user;
 
-import com.bookingapp.application.model.CurrentUser;
-import com.bookingapp.application.model.UpdateProfileCommand;
+import com.bookingapp.application.dto.CurrentUser;
+import com.bookingapp.application.dto.UpdateProfileCommand;
 import com.bookingapp.application.port.out.persistence.UserRepositoryPort;
 import com.bookingapp.application.port.out.security.CurrentUserProviderPort;
+import com.bookingapp.application.usecase.user.UserProfileApplicationService;
 import com.bookingapp.domain.enums.UserRole;
 import com.bookingapp.domain.exception.BusinessValidationException;
 import com.bookingapp.domain.model.User;

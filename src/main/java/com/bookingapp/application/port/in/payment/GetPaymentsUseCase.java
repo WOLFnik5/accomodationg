@@ -1,6 +1,6 @@
 package com.bookingapp.application.port.in.payment;
 
-import com.bookingapp.application.model.PaymentFilterQuery;
+import com.bookingapp.application.dto.PaymentFilterQuery;
 import com.bookingapp.domain.model.Payment;
 
 import java.util.List;

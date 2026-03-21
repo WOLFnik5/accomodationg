@@ -1,6 +1,6 @@
 package com.bookingapp.application.port.out.integration;
 
-import com.bookingapp.application.model.PaymentSession;
+import com.bookingapp.application.dto.PaymentSession;
 import com.bookingapp.domain.model.Accommodation;
 import com.bookingapp.domain.model.Booking;
 import com.bookingapp.domain.model.Payment;

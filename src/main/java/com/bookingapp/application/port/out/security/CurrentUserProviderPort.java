@@ -1,6 +1,6 @@
 package com.bookingapp.application.port.out.security;
 
-import com.bookingapp.application.model.CurrentUser;
+import com.bookingapp.application.dto.CurrentUser;
 
 public interface CurrentUserProviderPort {
 

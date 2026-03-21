@@ -1,5 +1,7 @@
 package com.bookingapp.adapter.in.web.booking;
 
+import com.bookingapp.adapter.in.web.dto.CreateBookingRequest;
+import com.bookingapp.adapter.in.web.dto.UpdateBookingRequest;
 import com.bookingapp.adapter.in.web.support.AbstractControllerIntegrationTest;
 import com.bookingapp.domain.enums.AccommodationType;
 import com.bookingapp.domain.enums.BookingStatus;

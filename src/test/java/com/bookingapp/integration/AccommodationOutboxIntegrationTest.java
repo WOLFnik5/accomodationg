@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import com.bookingapp.adapter.out.persistence.outbox.OutboxEventEntity;
 import com.bookingapp.adapter.out.persistence.outbox.OutboxEventJpaRepository;
 import com.bookingapp.adapter.out.persistence.outbox.OutboxStatus;
-import com.bookingapp.application.model.CreateAccommodationCommand;
+import com.bookingapp.application.dto.CreateAccommodationCommand;
 import com.bookingapp.application.port.in.accommodation.CreateAccommodationUseCase;
 import com.bookingapp.domain.enums.AccommodationType;
 import com.bookingapp.domain.model.Accommodation;

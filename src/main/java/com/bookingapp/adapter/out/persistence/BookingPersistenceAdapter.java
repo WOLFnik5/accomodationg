@@ -2,7 +2,7 @@ package com.bookingapp.adapter.out.persistence;
 
 import com.bookingapp.adapter.out.persistence.mapper.BookingPersistenceMapper;
 import com.bookingapp.adapter.out.persistence.repository.JpaBookingRepository;
-import com.bookingapp.application.model.BookingFilterQuery;
+import com.bookingapp.application.dto.BookingFilterQuery;
 import com.bookingapp.application.port.out.persistence.BookingRepositoryPort;
 import com.bookingapp.domain.enums.BookingStatus;
 import com.bookingapp.domain.model.Booking;

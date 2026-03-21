@@ -1,6 +1,6 @@
 package com.bookingapp.infrastructure.security;
 
-import com.bookingapp.application.model.CurrentUser;
+import com.bookingapp.application.dto.CurrentUser;
 import com.bookingapp.application.port.out.security.CurrentUserProviderPort;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;

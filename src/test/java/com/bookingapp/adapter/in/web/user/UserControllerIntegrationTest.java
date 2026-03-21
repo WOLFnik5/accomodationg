@@ -1,5 +1,8 @@
 package com.bookingapp.adapter.in.web.user;
 
+import com.bookingapp.adapter.in.web.dto.PatchCurrentUserRequest;
+import com.bookingapp.adapter.in.web.dto.UpdateCurrentUserRequest;
+import com.bookingapp.adapter.in.web.dto.UpdateUserRoleRequest;
 import com.bookingapp.adapter.in.web.support.AbstractControllerIntegrationTest;
 import com.bookingapp.domain.enums.UserRole;
 import com.bookingapp.domain.model.User;

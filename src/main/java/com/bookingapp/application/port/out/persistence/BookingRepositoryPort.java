@@ -1,6 +1,6 @@
 package com.bookingapp.application.port.out.persistence;
 
-import com.bookingapp.application.model.BookingFilterQuery;
+import com.bookingapp.application.dto.BookingFilterQuery;
 import com.bookingapp.domain.model.Booking;
 
 import java.time.LocalDate;

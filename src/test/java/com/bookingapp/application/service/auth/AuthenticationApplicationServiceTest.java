@@ -1,10 +1,11 @@
 package com.bookingapp.application.service.auth;
 
-import com.bookingapp.application.model.AuthenticationResult;
-import com.bookingapp.application.model.RegisterUserCommand;
+import com.bookingapp.application.dto.AuthenticationResult;
+import com.bookingapp.application.dto.RegisterUserCommand;
 import com.bookingapp.application.port.out.persistence.UserRepositoryPort;
 import com.bookingapp.application.port.out.security.PasswordEncoderPort;
 import com.bookingapp.application.port.out.security.TokenProviderPort;
+import com.bookingapp.application.usecase.auth.AuthenticationApplicationService;
 import com.bookingapp.domain.enums.UserRole;
 import com.bookingapp.domain.exception.BusinessValidationException;
 import com.bookingapp.domain.model.User;

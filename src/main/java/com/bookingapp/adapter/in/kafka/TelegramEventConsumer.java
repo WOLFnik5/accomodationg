@@ -1,10 +1,10 @@
 package com.bookingapp.adapter.in.kafka;
 
-import com.bookingapp.application.model.event.AccommodationCreatedEvent;
-import com.bookingapp.application.model.event.BookingCanceledEvent;
-import com.bookingapp.application.model.event.BookingCreatedEvent;
-import com.bookingapp.application.model.event.BookingExpiredEvent;
-import com.bookingapp.application.model.event.PaymentSucceededEvent;
+import com.bookingapp.application.dto.event.AccommodationCreatedEvent;
+import com.bookingapp.application.dto.event.BookingCanceledEvent;
+import com.bookingapp.application.dto.event.BookingCreatedEvent;
+import com.bookingapp.application.dto.event.BookingExpiredEvent;
+import com.bookingapp.application.dto.event.PaymentSucceededEvent;
 import com.bookingapp.application.port.in.notification.SendNotificationUseCase;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

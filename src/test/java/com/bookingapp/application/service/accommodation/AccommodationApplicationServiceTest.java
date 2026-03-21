@@ -3,10 +3,11 @@ package com.bookingapp.application.service.accommodation;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import com.bookingapp.application.model.CreateAccommodationCommand;
-import com.bookingapp.application.model.UpdateAccommodationCommand;
+import com.bookingapp.application.dto.CreateAccommodationCommand;
+import com.bookingapp.application.dto.UpdateAccommodationCommand;
 import com.bookingapp.application.port.out.integration.EventPublisherPort;
 import com.bookingapp.application.port.out.persistence.AccommodationRepositoryPort;
+import com.bookingapp.application.usecase.accommodation.AccommodationApplicationService;
 import com.bookingapp.domain.enums.AccommodationType;
 import com.bookingapp.domain.exception.BusinessValidationException;
 import com.bookingapp.domain.exception.EntityNotFoundDomainException;

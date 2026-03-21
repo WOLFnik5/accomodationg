@@ -1,8 +1,8 @@
 package com.bookingapp.application.service.payment;
 
-import com.bookingapp.application.model.CreatePaymentSessionCommand;
-import com.bookingapp.application.model.CurrentUser;
-import com.bookingapp.application.model.PaymentSession;
+import com.bookingapp.application.dto.CreatePaymentSessionCommand;
+import com.bookingapp.application.dto.CurrentUser;
+import com.bookingapp.application.dto.PaymentSession;
 import com.bookingapp.application.port.out.integration.EventPublisherPort;
 import com.bookingapp.application.port.out.integration.PaymentProviderPort;
 import com.bookingapp.application.port.out.persistence.AccommodationRepositoryPort;
@@ -10,6 +10,7 @@ import com.bookingapp.application.port.out.persistence.BookingRepositoryPort;
 import com.bookingapp.application.port.out.persistence.PaymentRepositoryPort;
 import com.bookingapp.application.port.out.persistence.UserRepositoryPort;
 import com.bookingapp.application.port.out.security.CurrentUserProviderPort;
+import com.bookingapp.application.usecase.payment.PaymentApplicationService;
 import com.bookingapp.domain.enums.AccommodationType;
 import com.bookingapp.domain.enums.BookingStatus;
 import com.bookingapp.domain.enums.PaymentStatus;

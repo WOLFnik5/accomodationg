@@ -1,12 +1,13 @@
 package com.bookingapp.application.service.booking;
 
-import com.bookingapp.application.model.CreateBookingCommand;
-import com.bookingapp.application.model.CurrentUser;
+import com.bookingapp.application.dto.CreateBookingCommand;
+import com.bookingapp.application.dto.CurrentUser;
 import com.bookingapp.application.port.out.integration.EventPublisherPort;
 import com.bookingapp.application.port.out.persistence.AccommodationRepositoryPort;
 import com.bookingapp.application.port.out.persistence.BookingRepositoryPort;
 import com.bookingapp.application.port.out.persistence.PaymentRepositoryPort;
 import com.bookingapp.application.port.out.security.CurrentUserProviderPort;
+import com.bookingapp.application.usecase.booking.BookingApplicationService;
 import com.bookingapp.domain.enums.AccommodationType;
 import com.bookingapp.domain.enums.BookingStatus;
 import com.bookingapp.domain.enums.UserRole;

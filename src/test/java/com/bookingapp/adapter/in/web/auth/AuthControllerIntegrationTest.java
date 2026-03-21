@@ -1,5 +1,7 @@
 package com.bookingapp.adapter.in.web.auth;
 
+import com.bookingapp.adapter.in.web.dto.LoginRequest;
+import com.bookingapp.adapter.in.web.dto.RegisterRequest;
 import com.bookingapp.adapter.in.web.support.AbstractControllerIntegrationTest;
 import com.bookingapp.domain.enums.UserRole;
 import com.bookingapp.domain.model.User;

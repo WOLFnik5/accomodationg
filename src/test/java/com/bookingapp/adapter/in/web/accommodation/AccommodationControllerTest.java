@@ -1,12 +1,14 @@
 package com.bookingapp.adapter.in.web.accommodation;
 
 import com.bookingapp.adapter.in.web.ControllerTestSecurityConfig;
+import com.bookingapp.adapter.in.web.controller.AccommodationController;
+import com.bookingapp.adapter.out.persistence.mapper.AccommodationWebMapper;
 import com.bookingapp.application.port.in.accommodation.CreateAccommodationUseCase;
 import com.bookingapp.application.port.in.accommodation.DeleteAccommodationUseCase;
 import com.bookingapp.application.port.in.accommodation.GetAccommodationByIdUseCase;
 import com.bookingapp.application.port.in.accommodation.ListAccommodationsUseCase;
 import com.bookingapp.application.port.in.accommodation.UpdateAccommodationUseCase;
-import com.bookingapp.common.exception.GlobalExceptionHandler;
+import com.bookingapp.domain.exception.GlobalExceptionHandler;
 import com.bookingapp.domain.enums.AccommodationType;
 import com.bookingapp.domain.model.Accommodation;
 import org.junit.jupiter.api.Test;

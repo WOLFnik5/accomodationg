@@ -1,6 +1,6 @@
 package com.bookingapp.infrastructure.scheduler;
 
-import com.bookingapp.application.model.ExpireBookingsCommand;
+import com.bookingapp.application.dto.ExpireBookingsCommand;
 import com.bookingapp.application.port.in.booking.ExpireBookingsUseCase;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
