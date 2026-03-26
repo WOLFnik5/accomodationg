@@ -3,13 +3,13 @@ package com.bookingapp.integration;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import com.bookingapp.adapter.out.persistence.outbox.OutboxEventEntity;
-import com.bookingapp.adapter.out.persistence.outbox.OutboxEventJpaRepository;
-import com.bookingapp.adapter.out.persistence.outbox.OutboxStatus;
-import com.bookingapp.application.dto.CreateAccommodationCommand;
-import com.bookingapp.application.dto.CreateBookingCommand;
-import com.bookingapp.application.port.in.accommodation.CreateAccommodationUseCase;
-import com.bookingapp.application.port.in.booking.CreateBookingUseCase;
+import com.bookingapp.infrastructure.persistence.outbox.OutboxEventEntity;
+import com.bookingapp.infrastructure.persistence.outbox.OutboxEventJpaRepository;
+import com.bookingapp.infrastructure.persistence.outbox.OutboxStatus;
+import com.bookingapp.domain.service.dto.CreateAccommodationCommand;
+import com.bookingapp.domain.service.dto.CreateBookingCommand;
+import com.bookingapp.domain.service.AccommodationService;
+import com.bookingapp.domain.service.BookingService;
 import com.bookingapp.domain.enums.AccommodationType;
 import com.bookingapp.domain.enums.UserRole;
 import com.bookingapp.domain.model.Accommodation;
@@ -33,10 +33,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 class BookingOutboxIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
-    private CreateAccommodationUseCase createAccommodationUseCase;
+    private AccommodationService accommodationService;
 
     @Autowired
-    private CreateBookingUseCase createBookingUseCase;
+    private BookingService bookingService;
 
     @Autowired
     private OutboxEventJpaRepository outboxEventJpaRepository;
@@ -91,7 +91,7 @@ class BookingOutboxIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void createBooking_shouldSaveOutboxEvent() {
-        Accommodation accommodation = createAccommodationUseCase.createAccommodation(
+        Accommodation accommodation = accommodationService.createAccommodation(
                 new CreateAccommodationCommand(
                         AccommodationType.APARTMENT,
                         "Kyiv",
@@ -108,7 +108,7 @@ class BookingOutboxIntegrationTest extends AbstractIntegrationTest {
                 LocalDate.of(2026, 1, 15)
         );
 
-        Booking savedBooking = createBookingUseCase.createBooking(command);
+        Booking savedBooking = bookingService.createBooking(command);
 
         OutboxEventEntity event = outboxEventJpaRepository.findAll().stream()
                 .filter(e -> "Booking".equals(e.getAggregateType()))

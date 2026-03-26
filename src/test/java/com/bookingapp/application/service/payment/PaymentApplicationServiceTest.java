@@ -1,16 +1,16 @@
 package com.bookingapp.application.service.payment;
 
-import com.bookingapp.application.dto.CreatePaymentSessionCommand;
-import com.bookingapp.application.dto.CurrentUser;
-import com.bookingapp.application.dto.PaymentSession;
-import com.bookingapp.application.port.out.integration.EventPublisherPort;
-import com.bookingapp.application.port.out.integration.PaymentProviderPort;
-import com.bookingapp.application.port.out.persistence.AccommodationRepositoryPort;
-import com.bookingapp.application.port.out.persistence.BookingRepositoryPort;
-import com.bookingapp.application.port.out.persistence.PaymentRepositoryPort;
-import com.bookingapp.application.port.out.persistence.UserRepositoryPort;
-import com.bookingapp.application.port.out.security.CurrentUserProviderPort;
-import com.bookingapp.application.usecase.payment.PaymentApplicationService;
+import com.bookingapp.domain.service.dto.CreatePaymentSessionCommand;
+import com.bookingapp.domain.service.dto.CurrentUser;
+import com.bookingapp.domain.service.dto.PaymentSession;
+import com.bookingapp.domain.service.PaymentService;
+import com.bookingapp.infrastructure.kafka.KafkaEventPublisher;
+import com.bookingapp.domain.repository.AccommodationRepository;
+import com.bookingapp.domain.repository.BookingRepository;
+import com.bookingapp.domain.repository.PaymentRepository;
+import com.bookingapp.domain.repository.UserRepository;
+import com.bookingapp.infrastructure.security.CurrentUserService;
+import com.bookingapp.infrastructure.stripe.StripePaymentProvider;
 import com.bookingapp.domain.enums.AccommodationType;
 import com.bookingapp.domain.enums.BookingStatus;
 import com.bookingapp.domain.enums.PaymentStatus;
@@ -40,28 +40,28 @@ import static org.mockito.Mockito.when;
 class PaymentApplicationServiceTest {
 
     @Mock
-    private PaymentRepositoryPort paymentRepositoryPort;
+    private PaymentRepository paymentRepository;
 
     @Mock
-    private BookingRepositoryPort bookingRepositoryPort;
+    private BookingRepository bookingRepository;
 
     @Mock
-    private AccommodationRepositoryPort accommodationRepositoryPort;
+    private AccommodationRepository accommodationRepository;
 
     @Mock
-    private UserRepositoryPort userRepositoryPort;
+    private UserRepository userRepository;
 
     @Mock
-    private CurrentUserProviderPort currentUserProviderPort;
+    private CurrentUserService currentUserService;
 
     @Mock
-    private PaymentProviderPort paymentProviderPort;
+    private StripePaymentProvider stripePaymentProvider;
 
     @Mock
-    private EventPublisherPort eventPublisherPort;
+    private KafkaEventPublisher kafkaEventPublisher;
 
     @InjectMocks
-    private PaymentApplicationService paymentApplicationService;
+    private PaymentService paymentService;
 
     @Test
     void createPaymentSessionShouldCalculateAmountFromBookingDaysAndRate() {
@@ -85,12 +85,12 @@ class PaymentApplicationServiceTest {
         User bookingOwner = new User(15L, "customer@example.com", "John", "Doe", "encoded", UserRole.CUSTOMER);
         CurrentUser currentUser = new CurrentUser(15L, "customer@example.com", UserRole.CUSTOMER);
 
-        when(currentUserProviderPort.getCurrentUser()).thenReturn(currentUser);
-        when(bookingRepositoryPort.findById(11L)).thenReturn(Optional.of(booking));
-        when(accommodationRepositoryPort.findById(3L)).thenReturn(Optional.of(accommodation));
-        when(userRepositoryPort.findById(15L)).thenReturn(Optional.of(bookingOwner));
-        when(paymentRepositoryPort.findByBookingId(11L)).thenReturn(Optional.empty());
-        when(paymentProviderPort.createPaymentSession(any(Payment.class), any(Booking.class), any(Accommodation.class), any(User.class)))
+        when(currentUserService.getCurrentUser()).thenReturn(currentUser);
+        when(bookingRepository.findById(11L)).thenReturn(Optional.of(booking));
+        when(accommodationRepository.findById(3L)).thenReturn(Optional.of(accommodation));
+        when(userRepository.findById(15L)).thenReturn(Optional.of(bookingOwner));
+        when(paymentRepository.findByBookingId(11L)).thenReturn(Optional.empty());
+        when(stripePaymentProvider.createPaymentSession(any(Payment.class), any(Booking.class), any(Accommodation.class), any(User.class)))
                 .thenReturn(new PaymentSession(
                         "sess_123",
                         "https://checkout.example/sess_123",
@@ -99,7 +99,7 @@ class PaymentApplicationServiceTest {
                         11L,
                         BigDecimal.valueOf(450)
                 ));
-        when(paymentRepositoryPort.save(any(Payment.class))).thenAnswer(invocation -> {
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(invocation -> {
             Payment payment = invocation.getArgument(0);
             return new Payment(
                     100L,
@@ -111,13 +111,13 @@ class PaymentApplicationServiceTest {
             );
         });
 
-        PaymentSession result = paymentApplicationService.createPaymentSession(new CreatePaymentSessionCommand(11L));
+        PaymentSession result = paymentService.createPaymentSession(new CreatePaymentSessionCommand(11L));
 
         assertThat(result.paymentId()).isEqualTo(100L);
         assertThat(result.amountToPay()).isEqualByComparingTo("450");
 
         ArgumentCaptor<Payment> paymentCaptor = ArgumentCaptor.forClass(Payment.class);
-        verify(paymentRepositoryPort).save(paymentCaptor.capture());
+        verify(paymentRepository).save(paymentCaptor.capture());
         assertThat(paymentCaptor.getValue().getAmountToPay()).isEqualByComparingTo("450");
         assertThat(paymentCaptor.getValue().getStatus()).isEqualTo(PaymentStatus.PENDING);
     }
@@ -133,13 +133,13 @@ class PaymentApplicationServiceTest {
                 BigDecimal.valueOf(450)
         );
 
-        when(paymentRepositoryPort.findBySessionId("sess_123")).thenReturn(Optional.of(pendingPayment));
-        when(paymentProviderPort.isPaymentSuccessful("sess_123")).thenReturn(true);
-        when(paymentRepositoryPort.save(any(Payment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(paymentRepository.findBySessionId("sess_123")).thenReturn(Optional.of(pendingPayment));
+        when(stripePaymentProvider.isPaymentSuccessful("sess_123")).thenReturn(true);
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Payment result = paymentApplicationService.handlePaymentSuccess("sess_123");
+        Payment result = paymentService.handlePaymentSuccess("sess_123");
 
         assertThat(result.getStatus()).isEqualTo(PaymentStatus.PAID);
-        verify(eventPublisherPort).publishPaymentSucceeded(result);
+        verify(kafkaEventPublisher).publishPaymentSucceeded(result);
     }
 }

@@ -8,7 +8,9 @@ import com.bookingapp.domain.event.BookingCanceledEvent;
 import com.bookingapp.domain.event.BookingCreatedEvent;
 import com.bookingapp.domain.event.BookingExpiredEvent;
 import com.bookingapp.domain.event.PaymentSucceededEvent;
-import com.bookingapp.application.port.in.notification.SendNotificationUseCase;
+import com.bookingapp.infrastructure.telegram.TelegramNotificationService;
+import com.bookingapp.infrastructure.kafka.TelegramEventConsumer;
+import com.bookingapp.infrastructure.kafka.TelegramKafkaMessageFormatter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -26,14 +28,14 @@ class TelegramEventConsumerTest {
     private TelegramKafkaMessageFormatter telegramKafkaMessageFormatter;
 
     @Mock
-    private SendNotificationUseCase sendNotificationUseCase;
+    private TelegramNotificationService telegramNotificationService;
 
     @Test
     void consumeBookingCreated_shouldDeserializePayloadFormatMessageAndSendNotification() throws Exception {
         TelegramEventConsumer consumer = new TelegramEventConsumer(
                 objectMapper,
                 telegramKafkaMessageFormatter,
-                sendNotificationUseCase
+                telegramNotificationService
         );
 
         BookingCreatedEvent event = new BookingCreatedEvent(
@@ -53,7 +55,7 @@ class TelegramEventConsumerTest {
         consumer.consumeBookingCreated(payload);
 
         verify(telegramKafkaMessageFormatter).formatBookingCreatedEvent(event);
-        verify(sendNotificationUseCase).sendMessage("booking created message");
+        verify(telegramNotificationService).sendMessage("booking created message");
     }
 
     @Test
@@ -61,7 +63,7 @@ class TelegramEventConsumerTest {
         TelegramEventConsumer consumer = new TelegramEventConsumer(
                 objectMapper,
                 telegramKafkaMessageFormatter,
-                sendNotificationUseCase
+                telegramNotificationService
         );
 
         BookingCanceledEvent event = new BookingCanceledEvent(
@@ -78,7 +80,7 @@ class TelegramEventConsumerTest {
         consumer.consumeBookingCanceled(payload);
 
         verify(telegramKafkaMessageFormatter).formatBookingCanceledEvent(event);
-        verify(sendNotificationUseCase).sendMessage("booking canceled message");
+        verify(telegramNotificationService).sendMessage("booking canceled message");
     }
 
     @Test
@@ -86,7 +88,7 @@ class TelegramEventConsumerTest {
         TelegramEventConsumer consumer = new TelegramEventConsumer(
                 objectMapper,
                 telegramKafkaMessageFormatter,
-                sendNotificationUseCase
+                telegramNotificationService
         );
 
         AccommodationCreatedEvent event = new AccommodationCreatedEvent(
@@ -105,7 +107,7 @@ class TelegramEventConsumerTest {
         consumer.consumeAccommodationCreated(payload);
 
         verify(telegramKafkaMessageFormatter).formatAccommodationCreatedEvent(event);
-        verify(sendNotificationUseCase).sendMessage("accommodation created message");
+        verify(telegramNotificationService).sendMessage("accommodation created message");
     }
 
     @Test
@@ -113,7 +115,7 @@ class TelegramEventConsumerTest {
         TelegramEventConsumer consumer = new TelegramEventConsumer(
                 objectMapper,
                 telegramKafkaMessageFormatter,
-                sendNotificationUseCase
+                telegramNotificationService
         );
 
         PaymentSucceededEvent event = new PaymentSucceededEvent(
@@ -131,7 +133,7 @@ class TelegramEventConsumerTest {
         consumer.consumePaymentSucceeded(payload);
 
         verify(telegramKafkaMessageFormatter).formatPaymentSucceededEvent(event);
-        verify(sendNotificationUseCase).sendMessage("payment succeeded message");
+        verify(telegramNotificationService).sendMessage("payment succeeded message");
     }
 
     @Test
@@ -139,7 +141,7 @@ class TelegramEventConsumerTest {
         TelegramEventConsumer consumer = new TelegramEventConsumer(
                 objectMapper,
                 telegramKafkaMessageFormatter,
-                sendNotificationUseCase
+                telegramNotificationService
         );
 
         BookingExpiredEvent event = new BookingExpiredEvent(
@@ -156,6 +158,6 @@ class TelegramEventConsumerTest {
         consumer.consumeBookingExpired(payload);
 
         verify(telegramKafkaMessageFormatter).formatBookingExpiredEvent(event);
-        verify(sendNotificationUseCase).sendMessage("booking expired message");
+        verify(telegramNotificationService).sendMessage("booking expired message");
     }
 }

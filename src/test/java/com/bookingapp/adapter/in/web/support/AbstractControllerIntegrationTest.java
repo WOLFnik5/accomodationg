@@ -1,15 +1,14 @@
 package com.bookingapp.adapter.in.web.support;
 
-import com.bookingapp.adapter.out.persistence.repository.JpaAccommodationRepository;
-import com.bookingapp.adapter.out.persistence.repository.JpaBookingRepository;
-import com.bookingapp.adapter.out.persistence.repository.JpaPaymentRepository;
-import com.bookingapp.adapter.out.persistence.repository.JpaUserRepository;
-import com.bookingapp.application.port.out.integration.EventPublisherPort;
-import com.bookingapp.application.port.out.integration.PaymentProviderPort;
-import com.bookingapp.application.port.out.persistence.AccommodationRepositoryPort;
-import com.bookingapp.application.port.out.persistence.BookingRepositoryPort;
-import com.bookingapp.application.port.out.persistence.PaymentRepositoryPort;
-import com.bookingapp.application.port.out.persistence.UserRepositoryPort;
+import com.bookingapp.domain.repository.AccommodationRepository;
+import com.bookingapp.domain.repository.BookingRepository;
+import com.bookingapp.infrastructure.persistence.repository.JpaAccommodationRepository;
+import com.bookingapp.infrastructure.persistence.repository.JpaBookingRepository;
+import com.bookingapp.infrastructure.persistence.repository.JpaPaymentRepository;
+import com.bookingapp.infrastructure.persistence.repository.JpaUserRepository;
+import com.bookingapp.infrastructure.kafka.KafkaEventPublisher;
+import com.bookingapp.domain.repository.PaymentRepository;
+import com.bookingapp.domain.repository.UserRepository;
 import com.bookingapp.domain.enums.AccommodationType;
 import com.bookingapp.domain.enums.BookingStatus;
 import com.bookingapp.domain.enums.PaymentStatus;
@@ -19,6 +18,7 @@ import com.bookingapp.domain.model.Booking;
 import com.bookingapp.domain.model.Payment;
 import com.bookingapp.domain.model.User;
 import com.bookingapp.infrastructure.security.JwtTokenService;
+import com.bookingapp.infrastructure.stripe.StripePaymentProvider;
 import com.bookingapp.support.PostgreSqlIntegrationTestSupport;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -58,16 +58,16 @@ public abstract class AbstractControllerIntegrationTest extends PostgreSqlIntegr
     protected PasswordEncoder passwordEncoder;
 
     @Autowired
-    protected UserRepositoryPort userRepositoryPort;
+    protected UserRepository userRepository;
 
     @Autowired
-    protected AccommodationRepositoryPort accommodationRepositoryPort;
+    protected AccommodationRepository accommodationRepository;
 
     @Autowired
-    protected BookingRepositoryPort bookingRepositoryPort;
+    protected BookingRepository bookingRepository;
 
     @Autowired
-    protected PaymentRepositoryPort paymentRepositoryPort;
+    protected PaymentRepository paymentRepository;
 
     @Autowired
     protected JpaUserRepository jpaUserRepository;
@@ -82,14 +82,14 @@ public abstract class AbstractControllerIntegrationTest extends PostgreSqlIntegr
     protected JpaPaymentRepository jpaPaymentRepository;
 
     @Autowired
-    protected EventPublisherPort eventPublisherPort;
+    protected KafkaEventPublisher kafkaEventPublisher;
 
     @Autowired
-    protected PaymentProviderPort paymentProviderPort;
+    protected StripePaymentProvider stripePaymentProvider;
 
     @BeforeEach
     void resetExternalMocks() {
-        Mockito.reset(eventPublisherPort, paymentProviderPort);
+        Mockito.reset(kafkaEventPublisher, stripePaymentProvider);
     }
 
     @AfterEach
@@ -109,7 +109,7 @@ public abstract class AbstractControllerIntegrationTest extends PostgreSqlIntegr
     }
 
     protected User persistUser(String email, String firstName, String lastName, String rawPassword, UserRole role) {
-        return userRepositoryPort.save(
+        return userRepository.save(
                 User.createNew(email, firstName, lastName, passwordEncoder.encode(rawPassword), role)
         );
     }
@@ -122,7 +122,7 @@ public abstract class AbstractControllerIntegrationTest extends PostgreSqlIntegr
             BigDecimal dailyRate,
             int availability
     ) {
-        return accommodationRepositoryPort.save(
+        return accommodationRepository.save(
                 Accommodation.createNew(type, location, size, amenities, dailyRate, availability)
         );
     }
@@ -134,7 +134,7 @@ public abstract class AbstractControllerIntegrationTest extends PostgreSqlIntegr
             Long userId,
             BookingStatus status
     ) {
-        return bookingRepositoryPort.save(
+        return bookingRepository.save(
                 new Booking(null, checkInDate, checkOutDate, accommodationId, userId, status)
         );
     }
@@ -146,7 +146,7 @@ public abstract class AbstractControllerIntegrationTest extends PostgreSqlIntegr
             String sessionId,
             BigDecimal amountToPay
     ) {
-        return paymentRepositoryPort.save(
+        return paymentRepository.save(
                 new Payment(null, status, bookingId, sessionUrl, sessionId, amountToPay)
         );
     }

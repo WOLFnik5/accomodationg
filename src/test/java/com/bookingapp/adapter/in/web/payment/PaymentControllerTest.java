@@ -1,15 +1,12 @@
 package com.bookingapp.adapter.in.web.payment;
 
 import com.bookingapp.adapter.in.web.ControllerTestSecurityConfig;
-import com.bookingapp.adapter.in.web.controller.PaymentController;
-import com.bookingapp.adapter.in.web.mapper.PaymentWebMapper;
-import com.bookingapp.application.dto.PaymentCancelResult;
-import com.bookingapp.application.dto.PaymentSession;
-import com.bookingapp.application.port.in.payment.CreatePaymentSessionUseCase;
-import com.bookingapp.application.port.in.payment.GetPaymentsUseCase;
-import com.bookingapp.application.port.in.payment.HandlePaymentCancelUseCase;
-import com.bookingapp.application.port.in.payment.HandlePaymentSuccessUseCase;
-import com.bookingapp.adapter.in.web.exception.GlobalExceptionHandler;
+import com.bookingapp.web.controller.PaymentController;
+import com.bookingapp.web.mapper.PaymentWebMapper;
+import com.bookingapp.domain.service.dto.PaymentCancelResult;
+import com.bookingapp.domain.service.dto.PaymentSession;
+import com.bookingapp.domain.service.PaymentService;
+import com.bookingapp.web.exception.GlobalExceptionHandler;
 import com.bookingapp.domain.enums.PaymentStatus;
 import com.bookingapp.domain.model.Payment;
 import org.junit.jupiter.api.Test;
@@ -48,16 +45,7 @@ class PaymentControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private CreatePaymentSessionUseCase createPaymentSessionUseCase;
-
-    @MockitoBean
-    private GetPaymentsUseCase getPaymentsUseCase;
-
-    @MockitoBean
-    private HandlePaymentSuccessUseCase handlePaymentSuccessUseCase;
-
-    @MockitoBean
-    private HandlePaymentCancelUseCase handlePaymentCancelUseCase;
+    private PaymentService paymentService;
 
     @Test
     void getPaymentsShouldReturnUnauthorizedWhenAnonymous() throws Exception {
@@ -67,7 +55,7 @@ class PaymentControllerTest {
 
     @Test
     void handlePaymentSuccessShouldBeAccessibleWithoutAuthentication() throws Exception {
-        when(handlePaymentSuccessUseCase.handlePaymentSuccess("sess_public")).thenReturn(
+        when(paymentService.handlePaymentSuccess("sess_public")).thenReturn(
                 new Payment(101L, PaymentStatus.PAID, 12L, "https://checkout.example/sess_public", "sess_public", BigDecimal.valueOf(320))
         );
 
@@ -82,7 +70,7 @@ class PaymentControllerTest {
 
     @Test
     void createPaymentShouldReturnPaymentSessionJson() throws Exception {
-        when(createPaymentSessionUseCase.createPaymentSession(any())).thenReturn(
+        when(paymentService.createPaymentSession(any())).thenReturn(
                 new PaymentSession(
                         "sess_123",
                         "https://checkout.example/sess_123",
@@ -113,7 +101,7 @@ class PaymentControllerTest {
 
     @Test
     void getPaymentsShouldReturnListJson() throws Exception {
-        when(getPaymentsUseCase.getPayments(any())).thenReturn(List.of(
+        when(paymentService.getPayments(any())).thenReturn(List.of(
                 new Payment(100L, PaymentStatus.PENDING, 11L, "https://checkout.example/sess_123", "sess_123", BigDecimal.valueOf(450))
         ));
 
@@ -146,7 +134,7 @@ class PaymentControllerTest {
 
     @Test
     void handlePaymentSuccessShouldReturnUserFriendlyResponse() throws Exception {
-        when(handlePaymentSuccessUseCase.handlePaymentSuccess("sess_123")).thenReturn(
+        when(paymentService.handlePaymentSuccess("sess_123")).thenReturn(
                 new Payment(100L, PaymentStatus.PAID, 11L, "https://checkout.example/sess_123", "sess_123", BigDecimal.valueOf(450))
         );
 
@@ -162,7 +150,7 @@ class PaymentControllerTest {
 
     @Test
     void handlePaymentCancelShouldReturnCancelResponse() throws Exception {
-        when(handlePaymentCancelUseCase.handlePaymentCancel("sess_123")).thenReturn(
+        when(paymentService.handlePaymentCancel("sess_123")).thenReturn(
                 new PaymentCancelResult(
                         100L,
                         "sess_123",

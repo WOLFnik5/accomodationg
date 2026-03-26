@@ -3,11 +3,11 @@ package com.bookingapp.application.service.accommodation;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import com.bookingapp.application.dto.CreateAccommodationCommand;
-import com.bookingapp.application.dto.UpdateAccommodationCommand;
-import com.bookingapp.application.port.out.integration.EventPublisherPort;
-import com.bookingapp.application.port.out.persistence.AccommodationRepositoryPort;
-import com.bookingapp.application.usecase.accommodation.AccommodationApplicationService;
+import com.bookingapp.domain.service.dto.CreateAccommodationCommand;
+import com.bookingapp.domain.service.dto.UpdateAccommodationCommand;
+import com.bookingapp.domain.service.AccommodationService;
+import com.bookingapp.infrastructure.kafka.KafkaEventPublisher;
+import com.bookingapp.domain.repository.AccommodationRepository;
 import com.bookingapp.domain.enums.AccommodationType;
 import com.bookingapp.domain.exception.BusinessValidationException;
 import com.bookingapp.domain.exception.EntityNotFoundDomainException;
@@ -27,13 +27,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class AccommodationApplicationServiceTest {
 
     @Mock
-    private AccommodationRepositoryPort accommodationRepositoryPort;
+    private AccommodationRepository accommodationRepository;
 
     @Mock
-    private EventPublisherPort eventPublisherPort;
+    private KafkaEventPublisher kafkaEventPublisher;
 
     @InjectMocks
-    private AccommodationApplicationService accommodationApplicationService;
+    private AccommodationService accommodationService;
 
     @Test
     void createAccommodation_shouldSaveAndPublishEvent() {
@@ -58,14 +58,14 @@ class AccommodationApplicationServiceTest {
                         3
                 );
 
-        when(accommodationRepositoryPort.save(any())).thenReturn(savedAccommodation);
+        when(accommodationRepository.save(any())).thenReturn(savedAccommodation);
 
-        Accommodation result = accommodationApplicationService.createAccommodation(command);
+        Accommodation result = accommodationService.createAccommodation(command);
 
         assertEquals(savedAccommodation, result);
 
-        verify(accommodationRepositoryPort).save(any());
-        verify(eventPublisherPort).publishAccommodationCreated(savedAccommodation);
+        verify(accommodationRepository).save(any());
+        verify(kafkaEventPublisher).publishAccommodationCreated(savedAccommodation);
     }
 
     @Test
@@ -73,7 +73,7 @@ class AccommodationApplicationServiceTest {
 
         assertThrows(
                 BusinessValidationException.class,
-                () -> accommodationApplicationService.createAccommodation(null)
+                () -> accommodationService.createAccommodation(null)
         );
     }
 
@@ -91,10 +91,10 @@ class AccommodationApplicationServiceTest {
                         2
                 );
 
-        when(accommodationRepositoryPort.findById(1L))
+        when(accommodationRepository.findById(1L))
                 .thenReturn(Optional.of(accommodation));
 
-        Accommodation result = accommodationApplicationService.getAccommodationById(1L);
+        Accommodation result = accommodationService.getAccommodationById(1L);
 
         assertEquals(accommodation, result);
     }
@@ -102,12 +102,12 @@ class AccommodationApplicationServiceTest {
     @Test
     void getAccommodationById_shouldThrow_whenNotFound() {
 
-        when(accommodationRepositoryPort.findById(1L))
+        when(accommodationRepository.findById(1L))
                 .thenReturn(Optional.empty());
 
         assertThrows(
                 EntityNotFoundDomainException.class,
-                () -> accommodationApplicationService.getAccommodationById(1L)
+                () -> accommodationService.getAccommodationById(1L)
         );
     }
 
@@ -136,10 +136,10 @@ class AccommodationApplicationServiceTest {
                         0
                 );
 
-        when(accommodationRepositoryPort.findAll())
+        when(accommodationRepository.findAll())
                 .thenReturn(List.of(available, unavailable));
 
-        List<Accommodation> result = accommodationApplicationService.listAccommodations();
+        List<Accommodation> result = accommodationService.listAccommodations();
 
         assertEquals(1, result.size());
         assertEquals(available, result.get(0));
@@ -180,38 +180,38 @@ class AccommodationApplicationServiceTest {
                         2
                 );
 
-        when(accommodationRepositoryPort.findById(1L))
+        when(accommodationRepository.findById(1L))
                 .thenReturn(Optional.of(existing));
 
-        when(accommodationRepositoryPort.save(any()))
+        when(accommodationRepository.save(any()))
                 .thenReturn(updated);
 
         Accommodation result =
-                accommodationApplicationService.updateAccommodation(command);
+                accommodationService.updateAccommodation(command);
 
         assertEquals(updated, result);
 
-        verify(accommodationRepositoryPort).save(any());
+        verify(accommodationRepository).save(any());
     }
 
     @Test
     void deleteAccommodation_shouldDelete_whenExists() {
 
-        when(accommodationRepositoryPort.existsById(1L)).thenReturn(true);
+        when(accommodationRepository.existsById(1L)).thenReturn(true);
 
-        accommodationApplicationService.deleteAccommodation(1L);
+        accommodationService.deleteAccommodation(1L);
 
-        verify(accommodationRepositoryPort).deleteById(1L);
+        verify(accommodationRepository).deleteById(1L);
     }
 
     @Test
     void deleteAccommodation_shouldThrow_whenNotExists() {
 
-        when(accommodationRepositoryPort.existsById(1L)).thenReturn(false);
+        when(accommodationRepository.existsById(1L)).thenReturn(false);
 
         assertThrows(
                 EntityNotFoundDomainException.class,
-                () -> accommodationApplicationService.deleteAccommodation(1L)
+                () -> accommodationService.deleteAccommodation(1L)
         );
     }
 }

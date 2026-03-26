@@ -1,13 +1,13 @@
 package com.bookingapp.application.service.booking;
 
-import com.bookingapp.application.dto.CreateBookingCommand;
-import com.bookingapp.application.dto.CurrentUser;
-import com.bookingapp.application.port.out.integration.EventPublisherPort;
-import com.bookingapp.application.port.out.persistence.AccommodationRepositoryPort;
-import com.bookingapp.application.port.out.persistence.BookingRepositoryPort;
-import com.bookingapp.application.port.out.persistence.PaymentRepositoryPort;
-import com.bookingapp.application.port.out.security.CurrentUserProviderPort;
-import com.bookingapp.application.usecase.booking.BookingApplicationService;
+import com.bookingapp.domain.service.dto.CreateBookingCommand;
+import com.bookingapp.domain.service.dto.CurrentUser;
+import com.bookingapp.domain.service.BookingService;
+import com.bookingapp.infrastructure.kafka.KafkaEventPublisher;
+import com.bookingapp.domain.repository.AccommodationRepository;
+import com.bookingapp.domain.repository.BookingRepository;
+import com.bookingapp.domain.repository.PaymentRepository;
+import com.bookingapp.infrastructure.security.CurrentUserService;
 import com.bookingapp.domain.enums.AccommodationType;
 import com.bookingapp.domain.enums.BookingStatus;
 import com.bookingapp.domain.enums.UserRole;
@@ -38,22 +38,22 @@ import static org.mockito.Mockito.when;
 class BookingApplicationServiceTest {
 
     @Mock
-    private BookingRepositoryPort bookingRepositoryPort;
+    private BookingRepository bookingRepository;
 
     @Mock
-    private AccommodationRepositoryPort accommodationRepositoryPort;
+    private AccommodationRepository accommodationRepository;
 
     @Mock
-    private PaymentRepositoryPort paymentRepositoryPort;
+    private PaymentRepository paymentRepository;
 
     @Mock
-    private CurrentUserProviderPort currentUserProviderPort;
+    private CurrentUserService currentUserService;
 
     @Mock
-    private EventPublisherPort eventPublisherPort;
+    private KafkaEventPublisher kafkaEventPublisher;
 
     @InjectMocks
-    private BookingApplicationService bookingApplicationService;
+    private BookingService bookingService;
 
     @Test
     void createBookingShouldPersistPendingBookingForCurrentUser() {
@@ -73,11 +73,11 @@ class BookingApplicationServiceTest {
                 LocalDate.now().plusDays(8)
         );
 
-        when(currentUserProviderPort.getCurrentUser()).thenReturn(currentUser);
-        when(accommodationRepositoryPort.findById(3L)).thenReturn(Optional.of(accommodation));
-        when(bookingRepositoryPort.existsActiveBookingOverlap(eq(3L), any(LocalDate.class), any(LocalDate.class), eq(null)))
+        when(currentUserService.getCurrentUser()).thenReturn(currentUser);
+        when(accommodationRepository.findById(3L)).thenReturn(Optional.of(accommodation));
+        when(bookingRepository.existsActiveBookingOverlap(eq(3L), any(LocalDate.class), any(LocalDate.class), eq(null)))
                 .thenReturn(false);
-        when(bookingRepositoryPort.save(any(Booking.class))).thenAnswer(invocation -> {
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> {
             Booking booking = invocation.getArgument(0);
             return new Booking(
                     101L,
@@ -89,13 +89,13 @@ class BookingApplicationServiceTest {
             );
         });
 
-        Booking result = bookingApplicationService.createBooking(command);
+        Booking result = bookingService.createBooking(command);
 
         assertThat(result.getId()).isEqualTo(101L);
         assertThat(result.getAccommodationId()).isEqualTo(3L);
         assertThat(result.getUserId()).isEqualTo(15L);
         assertThat(result.getStatus()).isEqualTo(BookingStatus.PENDING);
-        verify(eventPublisherPort).publishBookingCreated(result);
+        verify(kafkaEventPublisher).publishBookingCreated(result);
     }
 
     @Test
@@ -116,16 +116,16 @@ class BookingApplicationServiceTest {
                 LocalDate.now().plusDays(8)
         );
 
-        when(currentUserProviderPort.getCurrentUser()).thenReturn(currentUser);
-        when(accommodationRepositoryPort.findById(3L)).thenReturn(Optional.of(accommodation));
-        when(bookingRepositoryPort.existsActiveBookingOverlap(eq(3L), any(LocalDate.class), any(LocalDate.class), eq(null)))
+        when(currentUserService.getCurrentUser()).thenReturn(currentUser);
+        when(accommodationRepository.findById(3L)).thenReturn(Optional.of(accommodation));
+        when(bookingRepository.existsActiveBookingOverlap(eq(3L), any(LocalDate.class), any(LocalDate.class), eq(null)))
                 .thenReturn(true);
 
-        assertThatThrownBy(() -> bookingApplicationService.createBooking(command))
+        assertThatThrownBy(() -> bookingService.createBooking(command))
                 .isInstanceOf(BookingConflictException.class)
                 .hasMessageContaining("already booked");
 
-        verify(bookingRepositoryPort, never()).save(any(Booking.class));
+        verify(bookingRepository, never()).save(any(Booking.class));
     }
 
     @Test
@@ -140,14 +140,14 @@ class BookingApplicationServiceTest {
                 BookingStatus.PENDING
         );
 
-        when(currentUserProviderPort.getCurrentUser()).thenReturn(currentUser);
-        when(bookingRepositoryPort.findById(8L)).thenReturn(Optional.of(existingBooking));
-        when(bookingRepositoryPort.save(any(Booking.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(currentUserService.getCurrentUser()).thenReturn(currentUser);
+        when(bookingRepository.findById(8L)).thenReturn(Optional.of(existingBooking));
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Booking result = bookingApplicationService.cancelBooking(8L);
+        Booking result = bookingService.cancelBooking(8L);
 
         assertThat(result.getStatus()).isEqualTo(BookingStatus.CANCELED);
-        verify(eventPublisherPort).publishBookingCanceled(result);
+        verify(kafkaEventPublisher).publishBookingCanceled(result);
     }
 
     @Test
@@ -162,14 +162,14 @@ class BookingApplicationServiceTest {
                 BookingStatus.CANCELED
         );
 
-        when(currentUserProviderPort.getCurrentUser()).thenReturn(currentUser);
-        when(bookingRepositoryPort.findById(8L)).thenReturn(Optional.of(canceledBooking));
+        when(currentUserService.getCurrentUser()).thenReturn(currentUser);
+        when(bookingRepository.findById(8L)).thenReturn(Optional.of(canceledBooking));
 
-        assertThatThrownBy(() -> bookingApplicationService.cancelBooking(8L))
+        assertThatThrownBy(() -> bookingService.cancelBooking(8L))
                 .isInstanceOf(InvalidBookingStateException.class)
                 .hasMessageContaining("already canceled");
 
-        verify(bookingRepositoryPort, never()).save(any(Booking.class));
-        verify(eventPublisherPort, never()).publishBookingCanceled(any(Booking.class));
+        verify(bookingRepository, never()).save(any(Booking.class));
+        verify(kafkaEventPublisher, never()).publishBookingCanceled(any(Booking.class));
     }
 }

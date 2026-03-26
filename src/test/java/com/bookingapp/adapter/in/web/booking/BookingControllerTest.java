@@ -1,16 +1,10 @@
 package com.bookingapp.adapter.in.web.booking;
 
 import com.bookingapp.adapter.in.web.ControllerTestSecurityConfig;
-import com.bookingapp.adapter.in.web.controller.BookingController;
-import com.bookingapp.adapter.in.web.mapper.BookingWebMapper;
-import com.bookingapp.application.port.in.accommodation.GetAccommodationByIdUseCase;
-import com.bookingapp.application.port.in.booking.CancelBookingUseCase;
-import com.bookingapp.application.port.in.booking.CreateBookingUseCase;
-import com.bookingapp.application.port.in.booking.GetBookingByIdUseCase;
-import com.bookingapp.application.port.in.booking.ListBookingsUseCase;
-import com.bookingapp.application.port.in.booking.ListMyBookingsUseCase;
-import com.bookingapp.application.port.in.booking.UpdateBookingUseCase;
-import com.bookingapp.adapter.in.web.exception.GlobalExceptionHandler;
+import com.bookingapp.web.controller.BookingController;
+import com.bookingapp.web.mapper.BookingWebMapper;
+import com.bookingapp.domain.service.BookingService;
+import com.bookingapp.web.exception.GlobalExceptionHandler;
 import com.bookingapp.domain.enums.AccommodationType;
 import com.bookingapp.domain.enums.BookingStatus;
 import com.bookingapp.domain.model.Accommodation;
@@ -52,25 +46,7 @@ class BookingControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private CreateBookingUseCase createBookingUseCase;
-
-    @MockitoBean
-    private GetBookingByIdUseCase getBookingByIdUseCase;
-
-    @MockitoBean
-    private ListBookingsUseCase listBookingsUseCase;
-
-    @MockitoBean
-    private ListMyBookingsUseCase listMyBookingsUseCase;
-
-    @MockitoBean
-    private UpdateBookingUseCase updateBookingUseCase;
-
-    @MockitoBean
-    private CancelBookingUseCase cancelBookingUseCase;
-
-    @MockitoBean
-    private GetAccommodationByIdUseCase getAccommodationByIdUseCase;
+    private BookingService bookingService;
 
     @Test
     void createBookingShouldReturnUnauthorizedWhenAnonymous() throws Exception {
@@ -82,7 +58,7 @@ class BookingControllerTest {
 
     @Test
     void createBookingShouldReturnCreatedBookingForAuthenticatedUser() throws Exception {
-        when(createBookingUseCase.createBooking(any())).thenReturn(
+        when(bookingService.createBooking(any())).thenReturn(
                 new Booking(9L, LocalDate.of(2099, 4, 10), LocalDate.of(2099, 4, 12), 3L, 15L, BookingStatus.PENDING)
         );
 
@@ -108,7 +84,7 @@ class BookingControllerTest {
 
     @Test
     void listBookingsShouldReturnFilteredAdminResponse() throws Exception {
-        when(listBookingsUseCase.listBookings(any())).thenReturn(List.of(
+        when(bookingService.listBookings(any())).thenReturn(List.of(
                 new Booking(9L, LocalDate.of(2099, 4, 10), LocalDate.of(2099, 4, 12), 3L, 15L, BookingStatus.PENDING)
         ));
 
@@ -145,10 +121,10 @@ class BookingControllerTest {
 
     @Test
     void getBookingByIdShouldReturnDetailedJson() throws Exception {
-        when(getBookingByIdUseCase.getBookingById(9L)).thenReturn(
+        when(bookingService.getBookingById(9L)).thenReturn(
                 new Booking(9L, LocalDate.of(2099, 4, 10), LocalDate.of(2099, 4, 12), 3L, 15L, BookingStatus.PENDING)
         );
-        when(getAccommodationByIdUseCase.getAccommodationById(3L)).thenReturn(
+        when(bookingService.getAccommodationByBookingId(9L)).thenReturn(
                 new Accommodation(3L, AccommodationType.HOUSE, "Warsaw", "2 rooms", List.of("wifi"), BigDecimal.valueOf(120), 2)
         );
 

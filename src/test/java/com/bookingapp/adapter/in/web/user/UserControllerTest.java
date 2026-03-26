@@ -1,12 +1,10 @@
 package com.bookingapp.adapter.in.web.user;
 
 import com.bookingapp.adapter.in.web.ControllerTestSecurityConfig;
-import com.bookingapp.adapter.in.web.controller.UserController;
-import com.bookingapp.adapter.in.web.mapper.UserWebMapper;
-import com.bookingapp.application.port.in.user.GetCurrentUserProfileUseCase;
-import com.bookingapp.application.port.in.user.UpdateCurrentUserProfileUseCase;
-import com.bookingapp.application.port.in.user.UpdateUserRoleUseCase;
-import com.bookingapp.adapter.in.web.exception.GlobalExceptionHandler;
+import com.bookingapp.web.controller.UserController;
+import com.bookingapp.web.mapper.UserWebMapper;
+import com.bookingapp.domain.service.UserService;
+import com.bookingapp.web.exception.GlobalExceptionHandler;
 import com.bookingapp.domain.enums.UserRole;
 import com.bookingapp.domain.model.User;
 import org.junit.jupiter.api.Test;
@@ -44,13 +42,7 @@ class UserControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private GetCurrentUserProfileUseCase getCurrentUserProfileUseCase;
-
-    @MockitoBean
-    private UpdateCurrentUserProfileUseCase updateCurrentUserProfileUseCase;
-
-    @MockitoBean
-    private UpdateUserRoleUseCase updateUserRoleUseCase;
+    private UserService userService;
 
     @Test
     void getCurrentUserProfileShouldReturnUnauthorizedWhenAnonymous() throws Exception {
@@ -60,7 +52,7 @@ class UserControllerTest {
 
     @Test
     void getCurrentUserProfileShouldReturnProfileJson() throws Exception {
-        when(getCurrentUserProfileUseCase.getCurrentUserProfile()).thenReturn(
+        when(userService.getCurrentUserProfile()).thenReturn(
                 new User(5L, "user@example.com", "John", "Doe", "encoded", UserRole.CUSTOMER)
         );
 
@@ -76,10 +68,10 @@ class UserControllerTest {
 
     @Test
     void patchCurrentUserProfileShouldReturnUpdatedJson() throws Exception {
-        when(getCurrentUserProfileUseCase.getCurrentUserProfile()).thenReturn(
+        when(userService.getCurrentUserProfile()).thenReturn(
                 new User(5L, "user@example.com", "John", "Doe", "encoded", UserRole.CUSTOMER)
         );
-        when(updateCurrentUserProfileUseCase.updateCurrentUserProfile(any())).thenReturn(
+        when(userService.updateCurrentUserProfile(any())).thenReturn(
                 new User(5L, "updated@example.com", "Jane", "Doe", "encoded", UserRole.CUSTOMER)
         );
 
@@ -100,7 +92,7 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.lastName").value("Doe"))
                 .andExpect(jsonPath("$.role").value("CUSTOMER"));
 
-        verify(updateCurrentUserProfileUseCase).updateCurrentUserProfile(any());
+        verify(userService).updateCurrentUserProfile(any());
     }
 
     @Test
@@ -118,7 +110,7 @@ class UserControllerTest {
 
     @Test
     void updateUserRoleShouldReturnUpdatedUserForAdmin() throws Exception {
-        when(updateUserRoleUseCase.updateUserRole(any())).thenReturn(
+        when(userService.updateUserRole(any())).thenReturn(
                 new User(10L, "user@example.com", "John", "Doe", "encoded", UserRole.ADMIN)
         );
 

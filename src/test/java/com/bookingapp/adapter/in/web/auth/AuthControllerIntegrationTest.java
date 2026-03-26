@@ -1,7 +1,7 @@
 package com.bookingapp.adapter.in.web.auth;
 
-import com.bookingapp.adapter.in.web.dto.LoginRequest;
-import com.bookingapp.adapter.in.web.dto.RegisterRequest;
+import com.bookingapp.web.dto.LoginRequest;
+import com.bookingapp.web.dto.RegisterRequest;
 import com.bookingapp.adapter.in.web.support.AbstractControllerIntegrationTest;
 import com.bookingapp.domain.enums.UserRole;
 import com.bookingapp.domain.model.User;
@@ -34,7 +34,7 @@ class AuthControllerIntegrationTest extends AbstractControllerIntegrationTest {
                 .andExpect(jsonPath("$.email").value("register-success@example.com"))
                 .andExpect(jsonPath("$.role").value("CUSTOMER"));
 
-        User savedUser = userRepositoryPort.findByEmail("register-success@example.com").orElseThrow();
+        User savedUser = userRepository.findByEmail("register-success@example.com").orElseThrow();
         assertThat(savedUser.getRole()).isEqualTo(UserRole.CUSTOMER);
         assertThat(passwordEncoder.matches(DEFAULT_PASSWORD, savedUser.getPassword())).isTrue();
         assertThat(savedUser.getPassword()).isNotEqualTo(DEFAULT_PASSWORD);

@@ -1,8 +1,8 @@
 package com.bookingapp.adapter.in.web.payment;
 
-import com.bookingapp.adapter.in.web.dto.CreatePaymentRequest;
+import com.bookingapp.web.dto.CreatePaymentRequest;
 import com.bookingapp.adapter.in.web.support.AbstractControllerIntegrationTest;
-import com.bookingapp.application.dto.PaymentSession;
+import com.bookingapp.domain.service.dto.PaymentSession;
 import com.bookingapp.domain.enums.AccommodationType;
 import com.bookingapp.domain.enums.BookingStatus;
 import com.bookingapp.domain.enums.PaymentStatus;
@@ -105,7 +105,7 @@ class PaymentControllerIntegrationTest extends AbstractControllerIntegrationTest
                 BookingStatus.PENDING
         );
 
-        when(paymentProviderPort.createPaymentSession(any(), any(), any(), any()))
+        when(stripePaymentProvider.createPaymentSession(any(), any(), any(), any()))
                 .thenReturn(new PaymentSession(
                         "sess_created",
                         "https://checkout.example/sess_created",
@@ -129,7 +129,7 @@ class PaymentControllerIntegrationTest extends AbstractControllerIntegrationTest
                 .andExpect(jsonPath("$.amountToPay").value(600));
 
         assertThat(jpaPaymentRepository.count()).isEqualTo(1);
-        Payment savedPayment = paymentRepositoryPort.findByBookingId(booking.getId()).orElseThrow();
+        Payment savedPayment = paymentRepository.findByBookingId(booking.getId()).orElseThrow();
         assertThat(savedPayment.getStatus()).isEqualTo(PaymentStatus.PENDING);
         assertThat(savedPayment.getSessionId()).isEqualTo("sess_created");
         assertThat(savedPayment.getAmountToPay()).isEqualByComparingTo("600");
@@ -208,7 +208,7 @@ class PaymentControllerIntegrationTest extends AbstractControllerIntegrationTest
                 "sess_paid",
                 BigDecimal.valueOf(300)
         );
-        when(paymentProviderPort.isPaymentSuccessful("sess_paid")).thenReturn(true);
+        when(stripePaymentProvider.isPaymentSuccessful("sess_paid")).thenReturn(true);
 
         mockMvc.perform(get("/payments/success")
                         .param("session_id", "sess_paid"))
@@ -219,7 +219,7 @@ class PaymentControllerIntegrationTest extends AbstractControllerIntegrationTest
                 .andExpect(jsonPath("$.payment.status").value("PAID"))
                 .andExpect(jsonPath("$.payment.sessionId").value("sess_paid"));
 
-        Payment paidPayment = paymentRepositoryPort.findById(payment.getId()).orElseThrow();
+        Payment paidPayment = paymentRepository.findById(payment.getId()).orElseThrow();
         assertThat(paidPayment.getStatus()).isEqualTo(PaymentStatus.PAID);
     }
 
@@ -248,7 +248,7 @@ class PaymentControllerIntegrationTest extends AbstractControllerIntegrationTest
                 "sess_cancel",
                 BigDecimal.valueOf(350)
         );
-        when(paymentProviderPort.isPaymentSessionActive("sess_cancel")).thenReturn(false);
+        when(stripePaymentProvider.isPaymentSessionActive("sess_cancel")).thenReturn(false);
 
         mockMvc.perform(get("/payments/cancel")
                         .param("session_id", "sess_cancel"))
@@ -259,7 +259,7 @@ class PaymentControllerIntegrationTest extends AbstractControllerIntegrationTest
                 .andExpect(jsonPath("$.sessionId").value("sess_cancel"))
                 .andExpect(jsonPath("$.canBeCompletedLater").value(false));
 
-        Payment expiredPayment = paymentRepositoryPort.findById(payment.getId()).orElseThrow();
+        Payment expiredPayment = paymentRepository.findById(payment.getId()).orElseThrow();
         assertThat(expiredPayment.getStatus()).isEqualTo(PaymentStatus.EXPIRED);
     }
 

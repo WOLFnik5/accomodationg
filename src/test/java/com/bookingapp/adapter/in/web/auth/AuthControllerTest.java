@@ -1,10 +1,9 @@
 package com.bookingapp.adapter.in.web.auth;
 
-import com.bookingapp.adapter.in.web.controller.AuthController;
-import com.bookingapp.application.dto.AuthenticationResult;
-import com.bookingapp.application.port.in.auth.LoginUseCase;
-import com.bookingapp.application.port.in.auth.RegisterUserUseCase;
-import com.bookingapp.adapter.in.web.exception.GlobalExceptionHandler;
+import com.bookingapp.web.controller.AuthController;
+import com.bookingapp.domain.service.dto.AuthenticationResult;
+import com.bookingapp.domain.service.AuthService;
+import com.bookingapp.web.exception.GlobalExceptionHandler;
 import com.bookingapp.domain.enums.UserRole;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,14 +37,11 @@ class AuthControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private RegisterUserUseCase registerUserUseCase;
-
-    @MockitoBean
-    private LoginUseCase loginUseCase;
+    private AuthService authService;
 
     @Test
     void registerShouldReturnCreatedAuthResponse() throws Exception {
-        when(registerUserUseCase.register(any())).thenReturn(
+        when(authService.register(any())).thenReturn(
                 new AuthenticationResult("jwt-token", 1L, "user@example.com", UserRole.CUSTOMER)
         );
 
@@ -67,12 +63,12 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.email").value("user@example.com"))
                 .andExpect(jsonPath("$.role").value("CUSTOMER"));
 
-        verify(registerUserUseCase).register(any());
+        verify(authService).register(any());
     }
 
     @Test
     void loginShouldReturnAuthResponse() throws Exception {
-        when(loginUseCase.login(any())).thenReturn(
+        when(authService.login(any())).thenReturn(
                 new AuthenticationResult("login-token", 7L, "admin@example.com", UserRole.ADMIN)
         );
 

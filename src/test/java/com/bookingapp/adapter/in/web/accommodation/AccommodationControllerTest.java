@@ -1,14 +1,10 @@
 package com.bookingapp.adapter.in.web.accommodation;
 
 import com.bookingapp.adapter.in.web.ControllerTestSecurityConfig;
-import com.bookingapp.adapter.in.web.controller.AccommodationController;
-import com.bookingapp.adapter.in.web.mapper.AccommodationWebMapper;
-import com.bookingapp.application.port.in.accommodation.CreateAccommodationUseCase;
-import com.bookingapp.application.port.in.accommodation.DeleteAccommodationUseCase;
-import com.bookingapp.application.port.in.accommodation.GetAccommodationByIdUseCase;
-import com.bookingapp.application.port.in.accommodation.ListAccommodationsUseCase;
-import com.bookingapp.application.port.in.accommodation.UpdateAccommodationUseCase;
-import com.bookingapp.adapter.in.web.exception.GlobalExceptionHandler;
+import com.bookingapp.web.controller.AccommodationController;
+import com.bookingapp.web.mapper.AccommodationWebMapper;
+import com.bookingapp.domain.service.AccommodationService;
+import com.bookingapp.web.exception.GlobalExceptionHandler;
 import com.bookingapp.domain.enums.AccommodationType;
 import com.bookingapp.domain.model.Accommodation;
 import org.junit.jupiter.api.Test;
@@ -48,23 +44,11 @@ class AccommodationControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private CreateAccommodationUseCase createAccommodationUseCase;
-
-    @MockitoBean
-    private GetAccommodationByIdUseCase getAccommodationByIdUseCase;
-
-    @MockitoBean
-    private ListAccommodationsUseCase listAccommodationsUseCase;
-
-    @MockitoBean
-    private UpdateAccommodationUseCase updateAccommodationUseCase;
-
-    @MockitoBean
-    private DeleteAccommodationUseCase deleteAccommodationUseCase;
+    private AccommodationService accommodationService;
 
     @Test
     void listAccommodationsShouldBePublic() throws Exception {
-        when(listAccommodationsUseCase.listAccommodations()).thenReturn(List.of(
+        when(accommodationService.listAccommodations()).thenReturn(List.of(
                 new Accommodation(1L, AccommodationType.HOUSE, "Warsaw", "2 rooms", List.of("wifi"), BigDecimal.valueOf(120), 2)
         ));
 
@@ -98,7 +82,7 @@ class AccommodationControllerTest {
 
     @Test
     void createAccommodationShouldReturnCreatedJsonForAdmin() throws Exception {
-        when(createAccommodationUseCase.createAccommodation(any())).thenReturn(
+        when(accommodationService.createAccommodation(any())).thenReturn(
                 new Accommodation(1L, AccommodationType.HOUSE, "Warsaw", "2 rooms", List.of("wifi", "parking"), BigDecimal.valueOf(120), 2)
         );
 

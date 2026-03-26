@@ -1,8 +1,8 @@
 package com.bookingapp.adapter.in.web.user;
 
-import com.bookingapp.adapter.in.web.dto.PatchCurrentUserRequest;
-import com.bookingapp.adapter.in.web.dto.UpdateCurrentUserRequest;
-import com.bookingapp.adapter.in.web.dto.UpdateUserRoleRequest;
+import com.bookingapp.web.dto.PatchCurrentUserRequest;
+import com.bookingapp.web.dto.UpdateCurrentUserRequest;
+import com.bookingapp.web.dto.UpdateUserRoleRequest;
 import com.bookingapp.adapter.in.web.support.AbstractControllerIntegrationTest;
 import com.bookingapp.domain.enums.UserRole;
 import com.bookingapp.domain.model.User;
@@ -61,7 +61,7 @@ class UserControllerIntegrationTest extends AbstractControllerIntegrationTest {
                 .andExpect(jsonPath("$.lastName").value("Customer"))
                 .andExpect(jsonPath("$.role").value("CUSTOMER"));
 
-        User updatedUser = userRepositoryPort.findById(customer.getId()).orElseThrow();
+        User updatedUser = userRepository.findById(customer.getId()).orElseThrow();
         assertThat(updatedUser.getEmail()).isEqualTo("updated-profile@example.com");
         assertThat(updatedUser.getFirstName()).isEqualTo("Updated");
         assertThat(updatedUser.getLastName()).isEqualTo("Customer");
@@ -87,7 +87,7 @@ class UserControllerIntegrationTest extends AbstractControllerIntegrationTest {
                 .andExpect(jsonPath("$.lastName").value("Customer"))
                 .andExpect(jsonPath("$.role").value("CUSTOMER"));
 
-        User updatedUser = userRepositoryPort.findById(customer.getId()).orElseThrow();
+        User updatedUser = userRepository.findById(customer.getId()).orElseThrow();
         assertThat(updatedUser.getEmail()).isEqualTo("patched-profile@example.com");
         assertThat(updatedUser.getFirstName()).isEqualTo("Patched");
         assertThat(updatedUser.getLastName()).isEqualTo("Customer");
@@ -105,7 +105,7 @@ class UserControllerIntegrationTest extends AbstractControllerIntegrationTest {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.path").value("/users/" + targetUser.getId() + "/role"));
 
-        User unchangedUser = userRepositoryPort.findById(targetUser.getId()).orElseThrow();
+        User unchangedUser = userRepository.findById(targetUser.getId()).orElseThrow();
         assertThat(unchangedUser.getRole()).isEqualTo(UserRole.CUSTOMER);
     }
 
@@ -124,7 +124,7 @@ class UserControllerIntegrationTest extends AbstractControllerIntegrationTest {
                 .andExpect(jsonPath("$.email").value("profile-role-change@example.com"))
                 .andExpect(jsonPath("$.role").value("ADMIN"));
 
-        User updatedUser = userRepositoryPort.findById(targetUser.getId()).orElseThrow();
+        User updatedUser = userRepository.findById(targetUser.getId()).orElseThrow();
         assertThat(updatedUser.getRole()).isEqualTo(UserRole.ADMIN);
     }
 

@@ -1,0 +1,83 @@
+package com.bookingapp.web.controller;
+
+import com.bookingapp.web.dto.CreatePaymentRequest;
+import com.bookingapp.web.dto.PaymentCancelResponse;
+import com.bookingapp.web.dto.PaymentResponse;
+import com.bookingapp.web.dto.PaymentSuccessResponse;
+import com.bookingapp.web.mapper.PaymentWebMapper;
+import com.bookingapp.domain.service.dto.PaymentSession;
+import com.bookingapp.domain.service.PaymentService;
+import com.bookingapp.domain.model.Payment;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/payments")
+@Tag(name = "Payments", description = "Stripe payment session and callback operations")
+public class PaymentController {
+
+    private final PaymentService paymentService;
+    private final PaymentWebMapper paymentWebMapper;
+
+    public PaymentController(
+            PaymentService paymentService,
+            PaymentWebMapper paymentWebMapper
+    ) {
+        this.paymentService = paymentService;
+        this.paymentWebMapper = paymentWebMapper;
+    }
+
+    @GetMapping
+    @Operation(summary = "List payments", security = @SecurityRequirement(name = "bearerAuth"))
+    public List<PaymentResponse> getPayments(
+            @RequestParam(name = "user_id", required = false) Long userId
+    ) {
+        return paymentService.getPayments(paymentWebMapper.toFilterQuery(userId)).stream()
+                .map(paymentWebMapper::toResponse)
+                .toList();
+    }
+
+    @PostMapping
+    @Operation(summary = "Create payment session for booking", security = @SecurityRequirement(name = "bearerAuth"))
+    public PaymentResponse createPayment(@Valid @RequestBody CreatePaymentRequest request) {
+        PaymentSession paymentSession = paymentService.createPaymentSession(
+                paymentWebMapper.toCreatePaymentSessionCommand(request)
+        );
+
+        return paymentWebMapper.toResponse(
+                paymentSession.paymentId(),
+                paymentSession.sessionId(),
+                paymentSession.sessionUrl(),
+                paymentSession.status(),
+                paymentSession.amountToPay(),
+                paymentSession.bookingId()
+        );
+    }
+
+    @GetMapping("/success")
+    @Operation(summary = "Handle successful payment callback")
+    public PaymentSuccessResponse handlePaymentSuccess(
+            @RequestParam(name = "session_id") String sessionId
+    ) {
+        Payment payment = paymentService.handlePaymentSuccess(sessionId);
+        return paymentWebMapper.toSuccessResponse(payment);
+    }
+
+    @GetMapping("/cancel")
+    @Operation(summary = "Handle canceled payment callback")
+    public PaymentCancelResponse handlePaymentCancel(
+            @RequestParam(name = "session_id") String sessionId
+    ) {
+        return paymentWebMapper.toCancelResponse(paymentService.handlePaymentCancel(sessionId));
+    }
+}

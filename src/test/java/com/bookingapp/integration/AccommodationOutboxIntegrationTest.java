@@ -3,11 +3,11 @@ package com.bookingapp.integration;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import com.bookingapp.adapter.out.persistence.outbox.OutboxEventEntity;
-import com.bookingapp.adapter.out.persistence.outbox.OutboxEventJpaRepository;
-import com.bookingapp.adapter.out.persistence.outbox.OutboxStatus;
-import com.bookingapp.application.dto.CreateAccommodationCommand;
-import com.bookingapp.application.port.in.accommodation.CreateAccommodationUseCase;
+import com.bookingapp.infrastructure.persistence.outbox.OutboxEventEntity;
+import com.bookingapp.infrastructure.persistence.outbox.OutboxEventJpaRepository;
+import com.bookingapp.infrastructure.persistence.outbox.OutboxStatus;
+import com.bookingapp.domain.service.dto.CreateAccommodationCommand;
+import com.bookingapp.domain.service.AccommodationService;
 import com.bookingapp.domain.enums.AccommodationType;
 import com.bookingapp.domain.model.Accommodation;
 import jakarta.persistence.EntityManager;
@@ -26,14 +26,14 @@ class AccommodationOutboxIntegrationTest extends AbstractIntegrationTest {
     private EntityManager entityManager;
 
     @Autowired
-    private CreateAccommodationUseCase createAccommodationUseCase;
+    private AccommodationService accommodationService;
 
     @Autowired
     private OutboxEventJpaRepository outboxEventJpaRepository;
 
     @Test
     void createAccommodation_shouldSaveOutboxEvent() {
-        Accommodation savedAccommodation = createAccommodationUseCase.createAccommodation(
+        Accommodation savedAccommodation = accommodationService.createAccommodation(
                 new CreateAccommodationCommand(
                         AccommodationType.APARTMENT,
                         "Kyiv",

@@ -1,7 +1,7 @@
 package com.bookingapp.adapter.in.web.accommodation;
 
-import com.bookingapp.adapter.in.web.dto.CreateAccommodationRequest;
-import com.bookingapp.adapter.in.web.dto.UpdateAccommodationRequest;
+import com.bookingapp.web.dto.CreateAccommodationRequest;
+import com.bookingapp.web.dto.UpdateAccommodationRequest;
 import com.bookingapp.adapter.in.web.support.AbstractControllerIntegrationTest;
 import com.bookingapp.domain.enums.AccommodationType;
 import com.bookingapp.domain.model.Accommodation;
@@ -107,7 +107,7 @@ class AccommodationControllerIntegrationTest extends AbstractControllerIntegrati
                 .andExpect(jsonPath("$.availability").value(2));
 
         assertThat(jpaAccommodationRepository.count()).isEqualTo(1);
-        Accommodation savedAccommodation = accommodationRepositoryPort.findAll().get(0);
+        Accommodation savedAccommodation = accommodationRepository.findAll().get(0);
         assertThat(savedAccommodation.getLocation()).isEqualTo("Warsaw");
         assertThat(savedAccommodation.getAmenities()).containsExactly("wifi", "parking");
         assertThat(savedAccommodation.getDailyRate()).isEqualByComparingTo("120");
@@ -145,7 +145,7 @@ class AccommodationControllerIntegrationTest extends AbstractControllerIntegrati
                 .andExpect(jsonPath("$.dailyRate").value(220))
                 .andExpect(jsonPath("$.availability").value(4));
 
-        Accommodation updatedAccommodation = accommodationRepositoryPort.findById(accommodation.getId()).orElseThrow();
+        Accommodation updatedAccommodation = accommodationRepository.findById(accommodation.getId()).orElseThrow();
         assertThat(updatedAccommodation.getType()).isEqualTo(AccommodationType.CONDO);
         assertThat(updatedAccommodation.getLocation()).isEqualTo("Gdansk");
         assertThat(updatedAccommodation.getSize()).isEqualTo("Sea view apartment");

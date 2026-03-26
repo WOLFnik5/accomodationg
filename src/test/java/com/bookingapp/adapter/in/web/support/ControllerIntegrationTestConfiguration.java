@@ -1,7 +1,7 @@
 package com.bookingapp.adapter.in.web.support;
 
-import com.bookingapp.application.port.out.integration.EventPublisherPort;
-import com.bookingapp.application.port.out.integration.PaymentProviderPort;
+import com.bookingapp.infrastructure.kafka.KafkaEventPublisher;
+import com.bookingapp.infrastructure.stripe.StripePaymentProvider;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -12,13 +12,13 @@ public class ControllerIntegrationTestConfiguration {
 
     @Bean
     @Primary
-    EventPublisherPort eventPublisherPort() {
-        return Mockito.mock(EventPublisherPort.class);
+    KafkaEventPublisher kafkaEventPublisher() {
+        return Mockito.mock(KafkaEventPublisher.class);
     }
 
     @Bean
     @Primary
-    PaymentProviderPort paymentProviderPort() {
-        return Mockito.mock(PaymentProviderPort.class);
+    StripePaymentProvider stripePaymentProvider() {
+        return Mockito.mock(StripePaymentProvider.class);
     }
 }

@@ -1,11 +1,10 @@
 package com.bookingapp.application.service.auth;
 
-import com.bookingapp.application.dto.AuthenticationResult;
-import com.bookingapp.application.dto.RegisterUserCommand;
-import com.bookingapp.application.port.out.persistence.UserRepositoryPort;
-import com.bookingapp.application.port.out.security.PasswordEncoderPort;
-import com.bookingapp.application.port.out.security.TokenProviderPort;
-import com.bookingapp.application.usecase.auth.AuthenticationApplicationService;
+import com.bookingapp.domain.service.dto.AuthenticationResult;
+import com.bookingapp.domain.service.dto.RegisterUserCommand;
+import com.bookingapp.domain.service.AuthService;
+import com.bookingapp.domain.repository.UserRepository;
+import com.bookingapp.infrastructure.security.JwtTokenService;
 import com.bookingapp.domain.enums.UserRole;
 import com.bookingapp.domain.exception.BusinessValidationException;
 import com.bookingapp.domain.model.User;
@@ -14,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -25,16 +25,16 @@ import static org.mockito.Mockito.when;
 class AuthenticationApplicationServiceTest {
 
     @Mock
-    private UserRepositoryPort userRepositoryPort;
+    private UserRepository userRepository;
 
     @Mock
-    private PasswordEncoderPort passwordEncoderPort;
+    private PasswordEncoder passwordEncoder;
 
     @Mock
-    private TokenProviderPort tokenProviderPort;
+    private JwtTokenService jwtTokenService;
 
     @InjectMocks
-    private AuthenticationApplicationService authenticationApplicationService;
+    private AuthService authService;
 
     @Test
     void registerShouldCreateCustomerWithEncodedPassword() {
@@ -45,9 +45,9 @@ class AuthenticationApplicationServiceTest {
                 "raw-password"
         );
 
-        when(userRepositoryPort.existsByEmail("customer@example.com")).thenReturn(false);
-        when(passwordEncoderPort.encode("raw-password")).thenReturn("encoded-password");
-        when(userRepositoryPort.save(any(User.class))).thenAnswer(invocation -> {
+        when(userRepository.existsByEmail("customer@example.com")).thenReturn(false);
+        when(passwordEncoder.encode("raw-password")).thenReturn("encoded-password");
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
             User user = invocation.getArgument(0);
             return new User(
                     1L,
@@ -58,15 +58,15 @@ class AuthenticationApplicationServiceTest {
                     user.getRole()
             );
         });
-        when(tokenProviderPort.generateToken(any(User.class))).thenReturn("jwt-token");
+        when(jwtTokenService.generateToken(any(User.class))).thenReturn("jwt-token");
 
-        AuthenticationResult result = authenticationApplicationService.register(command);
+        AuthenticationResult result = authService.register(command);
 
         assertThat(result.userId()).isEqualTo(1L);
         assertThat(result.email()).isEqualTo("customer@example.com");
         assertThat(result.role()).isEqualTo(UserRole.CUSTOMER);
         assertThat(result.accessToken()).isEqualTo("jwt-token");
-        verify(passwordEncoderPort).encode("raw-password");
+        verify(passwordEncoder).encode("raw-password");
     }
 
     @Test
@@ -78,9 +78,9 @@ class AuthenticationApplicationServiceTest {
                 "raw-password"
         );
 
-        when(userRepositoryPort.existsByEmail("customer@example.com")).thenReturn(true);
+        when(userRepository.existsByEmail("customer@example.com")).thenReturn(true);
 
-        assertThatThrownBy(() -> authenticationApplicationService.register(command))
+        assertThatThrownBy(() -> authService.register(command))
                 .isInstanceOf(BusinessValidationException.class)
                 .hasMessageContaining("already exists");
     }

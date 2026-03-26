@@ -1,7 +1,7 @@
 package com.bookingapp.infrastructure.scheduler;
 
-import com.bookingapp.application.dto.ExpireBookingsCommand;
-import com.bookingapp.application.port.in.booking.ExpireBookingsUseCase;
+import com.bookingapp.domain.service.dto.ExpireBookingsCommand;
+import com.bookingapp.domain.service.BookingExpirationService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -10,14 +10,14 @@ import java.time.LocalDate;
 @Component
 public class BookingExpirationScheduler {
 
-    private final ExpireBookingsUseCase expireBookingsUseCase;
+    private final BookingExpirationService bookingExpirationService;
 
-    public BookingExpirationScheduler(ExpireBookingsUseCase expireBookingsUseCase) {
-        this.expireBookingsUseCase = expireBookingsUseCase;
+    public BookingExpirationScheduler(BookingExpirationService bookingExpirationService) {
+        this.bookingExpirationService = bookingExpirationService;
     }
 
     @Scheduled(cron = "${app.scheduler.booking-expiration.cron:0 0 1 * * *}")
     public void expireBookingsDaily() {
-        expireBookingsUseCase.expireBookings(new ExpireBookingsCommand(LocalDate.now()));
+        bookingExpirationService.expireBookings(new ExpireBookingsCommand(LocalDate.now()));
     }
 }

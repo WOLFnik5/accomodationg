@@ -1,10 +1,10 @@
 package com.bookingapp.application.service.user;
 
-import com.bookingapp.application.dto.CurrentUser;
-import com.bookingapp.application.dto.UpdateProfileCommand;
-import com.bookingapp.application.port.out.persistence.UserRepositoryPort;
-import com.bookingapp.application.port.out.security.CurrentUserProviderPort;
-import com.bookingapp.application.usecase.user.UserProfileApplicationService;
+import com.bookingapp.domain.service.dto.CurrentUser;
+import com.bookingapp.domain.service.dto.UpdateProfileCommand;
+import com.bookingapp.domain.service.UserService;
+import com.bookingapp.domain.repository.UserRepository;
+import com.bookingapp.infrastructure.security.CurrentUserService;
 import com.bookingapp.domain.enums.UserRole;
 import com.bookingapp.domain.exception.BusinessValidationException;
 import com.bookingapp.domain.model.User;
@@ -25,13 +25,13 @@ import static org.mockito.Mockito.when;
 class UserProfileApplicationServiceTest {
 
     @Mock
-    private UserRepositoryPort userRepositoryPort;
+    private UserRepository userRepository;
 
     @Mock
-    private CurrentUserProviderPort currentUserProviderPort;
+    private CurrentUserService currentUserService;
 
     @InjectMocks
-    private UserProfileApplicationService userProfileApplicationService;
+    private UserService userService;
 
     @Test
     void updateCurrentUserProfileShouldPersistUpdatedValues() {
@@ -39,12 +39,12 @@ class UserProfileApplicationServiceTest {
         User existingUser = new User(15L, "old@example.com", "John", "Doe", "encoded", UserRole.CUSTOMER);
         UpdateProfileCommand command = new UpdateProfileCommand("new@example.com", "Jane", "Smith");
 
-        when(currentUserProviderPort.getCurrentUser()).thenReturn(currentUser);
-        when(userRepositoryPort.findById(15L)).thenReturn(Optional.of(existingUser));
-        when(userRepositoryPort.existsByEmail("new@example.com")).thenReturn(false);
-        when(userRepositoryPort.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(currentUserService.getCurrentUser()).thenReturn(currentUser);
+        when(userRepository.findById(15L)).thenReturn(Optional.of(existingUser));
+        when(userRepository.existsByEmail("new@example.com")).thenReturn(false);
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        User result = userProfileApplicationService.updateCurrentUserProfile(command);
+        User result = userService.updateCurrentUserProfile(command);
 
         assertThat(result.getEmail()).isEqualTo("new@example.com");
         assertThat(result.getFirstName()).isEqualTo("Jane");
@@ -57,11 +57,11 @@ class UserProfileApplicationServiceTest {
         User existingUser = new User(15L, "old@example.com", "John", "Doe", "encoded", UserRole.CUSTOMER);
         UpdateProfileCommand command = new UpdateProfileCommand("taken@example.com", "Jane", "Smith");
 
-        when(currentUserProviderPort.getCurrentUser()).thenReturn(currentUser);
-        when(userRepositoryPort.findById(15L)).thenReturn(Optional.of(existingUser));
-        when(userRepositoryPort.existsByEmail("taken@example.com")).thenReturn(true);
+        when(currentUserService.getCurrentUser()).thenReturn(currentUser);
+        when(userRepository.findById(15L)).thenReturn(Optional.of(existingUser));
+        when(userRepository.existsByEmail("taken@example.com")).thenReturn(true);
 
-        assertThatThrownBy(() -> userProfileApplicationService.updateCurrentUserProfile(command))
+        assertThatThrownBy(() -> userService.updateCurrentUserProfile(command))
                 .isInstanceOf(BusinessValidationException.class)
                 .hasMessageContaining("already exists");
     }

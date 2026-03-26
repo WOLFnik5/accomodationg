@@ -1,7 +1,7 @@
 package com.bookingapp.adapter.in.web.booking;
 
-import com.bookingapp.adapter.in.web.dto.CreateBookingRequest;
-import com.bookingapp.adapter.in.web.dto.UpdateBookingRequest;
+import com.bookingapp.web.dto.CreateBookingRequest;
+import com.bookingapp.web.dto.UpdateBookingRequest;
 import com.bookingapp.adapter.in.web.support.AbstractControllerIntegrationTest;
 import com.bookingapp.domain.enums.AccommodationType;
 import com.bookingapp.domain.enums.BookingStatus;
@@ -92,7 +92,7 @@ class BookingControllerIntegrationTest extends AbstractControllerIntegrationTest
                 .andExpect(jsonPath("$.status").value("PENDING"));
 
         assertThat(jpaBookingRepository.count()).isEqualTo(1);
-        Booking savedBooking = bookingRepositoryPort.findAllByUserId(customer.getId()).get(0);
+        Booking savedBooking = bookingRepository.findAllByUserId(customer.getId()).get(0);
         assertThat(savedBooking.getAccommodationId()).isEqualTo(accommodation.getId());
         assertThat(savedBooking.getCheckInDate()).isEqualTo(checkInDate);
         assertThat(savedBooking.getCheckOutDate()).isEqualTo(checkOutDate);
@@ -230,7 +230,7 @@ class BookingControllerIntegrationTest extends AbstractControllerIntegrationTest
                 .andExpect(jsonPath("$.checkOutDate").value(newCheckOutDate.toString()))
                 .andExpect(jsonPath("$.status").value("PENDING"));
 
-        Booking updatedBooking = bookingRepositoryPort.findById(booking.getId()).orElseThrow();
+        Booking updatedBooking = bookingRepository.findById(booking.getId()).orElseThrow();
         assertThat(updatedBooking.getCheckInDate()).isEqualTo(newCheckInDate);
         assertThat(updatedBooking.getCheckOutDate()).isEqualTo(newCheckOutDate);
     }
@@ -260,7 +260,7 @@ class BookingControllerIntegrationTest extends AbstractControllerIntegrationTest
                 .andExpect(jsonPath("$.id").value(booking.getId()))
                 .andExpect(jsonPath("$.status").value("CANCELED"));
 
-        Booking canceledBooking = bookingRepositoryPort.findById(booking.getId()).orElseThrow();
+        Booking canceledBooking = bookingRepository.findById(booking.getId()).orElseThrow();
         assertThat(canceledBooking.getStatus()).isEqualTo(BookingStatus.CANCELED);
     }
 
