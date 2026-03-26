@@ -1,6 +1,6 @@
 package com.bookingapp;
 
-import com.bookingapp.support.PostgreSqlLiquibaseIntegrationTestSupport;
+import com.bookingapp.testsupport.PostgreSqlLiquibaseIntegrationTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
