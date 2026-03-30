@@ -129,6 +129,32 @@ class BookingServiceTest {
     }
 
     @Test
+    void createBookingShouldRejectWhenAccommodationAvailabilityIsZero() {
+        CurrentUser currentUser = new CurrentUser(15L, "customer@example.com", UserRole.CUSTOMER);
+        Accommodation accommodation = new Accommodation(
+                3L,
+                AccommodationType.HOUSE,
+                "Warsaw",
+                "2 rooms",
+                List.of("wifi"),
+                BigDecimal.valueOf(120),
+                0
+        );
+        when(currentUserService.getCurrentUser()).thenReturn(currentUser);
+        when(accommodationRepository.findById(3L)).thenReturn(Optional.of(accommodation));
+
+        assertThatThrownBy(() -> bookingService.createBooking(
+                3L,
+                LocalDate.now().plusDays(5),
+                LocalDate.now().plusDays(8)
+        ))
+                .isInstanceOf(BusinessValidationException.class)
+                .hasMessageContaining("not available");
+
+        verify(bookingRepository, never()).save(any(Booking.class));
+    }
+
+    @Test
     void cancelBookingShouldMarkBookingAsCanceled() {
         CurrentUser currentUser = new CurrentUser(15L, "customer@example.com", UserRole.CUSTOMER);
         Booking existingBooking = new Booking(
@@ -230,6 +256,23 @@ class BookingServiceTest {
     }
 
     @Test
+    void listBookingsShouldReturnAllBookingsForAdminWhenUserFilterIsMissing() {
+        CurrentUser admin = new CurrentUser(1L, "admin@example.com", UserRole.ADMIN);
+        BookingFilterQuery query = new BookingFilterQuery(null, null);
+        List<Booking> expected = List.of(
+                new Booking(9L, LocalDate.now().plusDays(3), LocalDate.now().plusDays(5), 3L, 15L, BookingStatus.PENDING),
+                new Booking(10L, LocalDate.now().plusDays(6), LocalDate.now().plusDays(8), 4L, 16L, BookingStatus.CONFIRMED)
+        );
+
+        when(currentUserService.getCurrentUser()).thenReturn(admin);
+        when(bookingRepository.findAllByFilter(query)).thenReturn(expected);
+
+        List<Booking> result = bookingService.listBookings(query);
+
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
     void listBookingsShouldReturnOnlyCurrentUsersFilteredBookingsForCustomer() {
         CurrentUser currentUser = new CurrentUser(15L, "customer@example.com", UserRole.CUSTOMER);
         Booking pendingBooking = new Booking(
@@ -255,6 +298,27 @@ class BookingServiceTest {
         List<Booking> result = bookingService.listBookings(new BookingFilterQuery(null, BookingStatus.PENDING));
 
         assertThat(result).containsExactly(pendingBooking);
+    }
+
+    @Test
+    void listBookingsShouldIgnoreUserFilterForCustomer() {
+        CurrentUser currentUser = new CurrentUser(15L, "customer@example.com", UserRole.CUSTOMER);
+        Booking ownBooking = new Booking(
+                9L,
+                LocalDate.now().plusDays(3),
+                LocalDate.now().plusDays(5),
+                3L,
+                15L,
+                BookingStatus.PENDING
+        );
+
+        when(currentUserService.getCurrentUser()).thenReturn(currentUser);
+        when(bookingRepository.findAllByUserId(15L)).thenReturn(List.of(ownBooking));
+
+        List<Booking> result = bookingService.listBookings(new BookingFilterQuery(999L, null));
+
+        assertThat(result).containsExactly(ownBooking);
+        verify(bookingRepository, never()).findAllByFilter(any());
     }
 
     @Test

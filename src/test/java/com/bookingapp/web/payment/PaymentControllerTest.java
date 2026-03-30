@@ -151,19 +151,18 @@ class PaymentControllerTest {
 
     @Test
     void handlePaymentCancelShouldReturnCancelResponse() throws Exception {
-        when(paymentService.handlePaymentCancel("sess_123")).thenReturn(
+        when(paymentService.handlePaymentCancel("sess_123", null)).thenReturn(
                 new PaymentCancelResult(
                         100L,
                         "sess_123",
                         "https://checkout.example/sess_123",
                         PaymentStatus.PENDING,
                         true,
-                        "Payment was canceled on the provider page, but the session is still active and can be completed later."
+                        "Payment was canceled on the provider page. You can pay later using the same session for a limited time."
                 )
         );
 
         mockMvc.perform(get("/payments/cancel")
-                        .with(user("customer@example.com").roles("CUSTOMER"))
                         .param("session_id", "sess_123"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -171,5 +170,28 @@ class PaymentControllerTest {
                 .andExpect(jsonPath("$.paymentStatus").value("PENDING"))
                 .andExpect(jsonPath("$.sessionId").value("sess_123"))
                 .andExpect(jsonPath("$.canBeCompletedLater").value(true));
+    }
+
+    @Test
+    void handlePaymentCancelShouldAcceptBookingIdWhenSessionIdIsOmitted() throws Exception {
+        when(paymentService.handlePaymentCancel(null, 11L)).thenReturn(
+                new PaymentCancelResult(
+                        100L,
+                        "sess_123",
+                        "https://checkout.example/sess_123",
+                        PaymentStatus.EXPIRED,
+                        false,
+                        "Payment session is no longer active. Create a new checkout session if you want to pay later."
+                )
+        );
+
+        mockMvc.perform(get("/payments/cancel")
+                        .param("booking_id", "11"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.paymentId").value(100))
+                .andExpect(jsonPath("$.paymentStatus").value("EXPIRED"))
+                .andExpect(jsonPath("$.sessionId").value("sess_123"))
+                .andExpect(jsonPath("$.canBeCompletedLater").value(false));
     }
 }

@@ -87,6 +87,112 @@ class PaymentControllerIntegrationTest extends AbstractControllerIntegrationTest
     }
 
     @Test
+    void getPayments_shouldReturnAllPaymentsForAdminWhenUserFilterIsMissing() throws Exception {
+        User admin = persistAdmin("payment-list-admin@example.com");
+        User firstCustomer = persistCustomer("payment-list-admin-first@example.com");
+        User secondCustomer = persistCustomer("payment-list-admin-second@example.com");
+        Accommodation accommodation = persistAccommodation(
+                AccommodationType.CONDO,
+                "Warsaw",
+                "Premium condo",
+                List.of("wifi"),
+                BigDecimal.valueOf(180),
+                2
+        );
+        Booking firstBooking = persistBooking(
+                futureDate(8),
+                futureDate(10),
+                accommodation.getId(),
+                firstCustomer.getId(),
+                BookingStatus.PENDING
+        );
+        Booking secondBooking = persistBooking(
+                futureDate(12),
+                futureDate(14),
+                accommodation.getId(),
+                secondCustomer.getId(),
+                BookingStatus.PENDING
+        );
+        Payment firstPayment = persistPayment(
+                PaymentStatus.PENDING,
+                firstBooking.getId(),
+                "https://checkout.example/admin-first",
+                "sess_admin_first",
+                BigDecimal.valueOf(360)
+        );
+        Payment secondPayment = persistPayment(
+                PaymentStatus.PAID,
+                secondBooking.getId(),
+                "https://checkout.example/admin-second",
+                "sess_admin_second",
+                BigDecimal.valueOf(360)
+        );
+
+        mockMvc.perform(get("/payments")
+                        .header("Authorization", authorizationHeader(admin)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$[0].id").isNumber())
+                .andExpect(jsonPath("$[1].id").isNumber());
+
+        List<Payment> payments = paymentRepository.findAllByFilter(new com.bookingapp.domain.service.dto.PaymentFilterQuery(null));
+        assertThat(payments).extracting(Payment::getId)
+                .containsExactlyInAnyOrder(firstPayment.getId(), secondPayment.getId());
+    }
+
+    @Test
+    void getPayments_shouldApplyUserFilterForAdmin() throws Exception {
+        User admin = persistAdmin("payment-list-filter-admin@example.com");
+        User currentUser = persistCustomer("payment-list-filter-current@example.com");
+        User otherUser = persistCustomer("payment-list-filter-other@example.com");
+        Accommodation accommodation = persistAccommodation(
+                AccommodationType.CONDO,
+                "Warsaw",
+                "Premium condo",
+                List.of("wifi"),
+                BigDecimal.valueOf(180),
+                2
+        );
+        Booking currentUserBooking = persistBooking(
+                futureDate(8),
+                futureDate(10),
+                accommodation.getId(),
+                currentUser.getId(),
+                BookingStatus.PENDING
+        );
+        Booking otherBooking = persistBooking(
+                futureDate(12),
+                futureDate(14),
+                accommodation.getId(),
+                otherUser.getId(),
+                BookingStatus.PENDING
+        );
+        Payment currentUserPayment = persistPayment(
+                PaymentStatus.PENDING,
+                currentUserBooking.getId(),
+                "https://checkout.example/current",
+                "sess_current",
+                BigDecimal.valueOf(360)
+        );
+        persistPayment(
+                PaymentStatus.PAID,
+                otherBooking.getId(),
+                "https://checkout.example/other",
+                "sess_other",
+                BigDecimal.valueOf(360)
+        );
+
+        mockMvc.perform(get("/payments")
+                        .header("Authorization", authorizationHeader(admin))
+                        .param("user_id", currentUser.getId().toString()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$[0].id").value(currentUserPayment.getId()))
+                .andExpect(jsonPath("$[0].bookingId").value(currentUserBooking.getId()))
+                .andExpect(jsonPath("$[1]").doesNotExist());
+    }
+
+    @Test
     void createPayment_shouldPersistSessionForBookingOwner() throws Exception {
         User customer = persistCustomer("payment-create@example.com");
         Accommodation accommodation = persistAccommodation(
@@ -261,6 +367,46 @@ class PaymentControllerIntegrationTest extends AbstractControllerIntegrationTest
 
         Payment expiredPayment = paymentRepository.findById(payment.getId()).orElseThrow();
         assertThat(expiredPayment.getStatus()).isEqualTo(PaymentStatus.EXPIRED);
+    }
+
+    @Test
+    void handlePaymentCancel_shouldUseBookingIdWhenSessionIdIsNotProvided() throws Exception {
+        User customer = persistCustomer("payment-cancel-booking-id@example.com");
+        Accommodation accommodation = persistAccommodation(
+                AccommodationType.HOUSE,
+                "Lublin",
+                "Family house",
+                List.of("parking"),
+                BigDecimal.valueOf(175),
+                1
+        );
+        Booking booking = persistBooking(
+                futureDate(9),
+                futureDate(11),
+                accommodation.getId(),
+                customer.getId(),
+                BookingStatus.PENDING
+        );
+        Payment payment = persistPayment(
+                PaymentStatus.PENDING,
+                booking.getId(),
+                "https://checkout.example/sess_cancel_later",
+                "sess_cancel_later",
+                BigDecimal.valueOf(350)
+        );
+        when(stripePaymentProvider.isPaymentSessionActive("sess_cancel_later")).thenReturn(true);
+
+        mockMvc.perform(get("/payments/cancel")
+                        .param("booking_id", booking.getId().toString()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.paymentId").value(payment.getId()))
+                .andExpect(jsonPath("$.paymentStatus").value("PENDING"))
+                .andExpect(jsonPath("$.sessionId").value("sess_cancel_later"))
+                .andExpect(jsonPath("$.canBeCompletedLater").value(true))
+                .andExpect(jsonPath("$.message").value(
+                        "Payment was canceled on the provider page. You can pay later using the same session for a limited time."
+                ));
     }
 
     @Test

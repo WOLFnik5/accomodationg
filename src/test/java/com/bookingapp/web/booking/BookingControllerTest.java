@@ -25,6 +25,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -78,9 +79,19 @@ class BookingControllerTest {
     }
 
     @Test
-    void listBookingsShouldReturnForbiddenForNonAdmin() throws Exception {
-        mockMvc.perform(get("/bookings").with(user("customer@example.com").roles("CUSTOMER")))
-                .andExpect(status().isForbidden());
+    void listBookingsShouldReturnCurrentUsersBookingsForCustomer() throws Exception {
+        when(bookingService.listBookings(any())).thenReturn(List.of(
+                new Booking(9L, LocalDate.of(2099, 4, 10), LocalDate.of(2099, 4, 12), 3L, 15L, BookingStatus.PENDING)
+        ));
+
+        mockMvc.perform(get("/bookings")
+                        .with(user("customer@example.com").roles("CUSTOMER"))
+                        .param("status", "PENDING"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$[0].id").value(9))
+                .andExpect(jsonPath("$[0].userId").value(15))
+                .andExpect(jsonPath("$[0].status").value("PENDING"));
     }
 
     @Test
@@ -98,6 +109,22 @@ class BookingControllerTest {
                 .andExpect(jsonPath("$[0].id").value(9))
                 .andExpect(jsonPath("$[0].userId").value(15))
                 .andExpect(jsonPath("$[0].status").value("PENDING"));
+    }
+
+    @Test
+    void listBookingsShouldAllowAdminWithoutFilters() throws Exception {
+        when(bookingService.listBookings(eq(new com.bookingapp.domain.service.dto.BookingFilterQuery(null, null))))
+                .thenReturn(List.of(
+                        new Booking(9L, LocalDate.of(2099, 4, 10), LocalDate.of(2099, 4, 12), 3L, 15L, BookingStatus.PENDING),
+                        new Booking(10L, LocalDate.of(2099, 4, 15), LocalDate.of(2099, 4, 18), 3L, 16L, BookingStatus.CONFIRMED)
+                ));
+
+        mockMvc.perform(get("/bookings")
+                        .with(user("admin@example.com").roles("ADMIN")))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$[0].id").value(9))
+                .andExpect(jsonPath("$[1].id").value(10));
     }
 
     @Test

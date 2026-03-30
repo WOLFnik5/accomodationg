@@ -116,17 +116,23 @@ public class PaymentService {
 
     @Transactional
     public PaymentCancelResult handlePaymentCancel(String sessionId) {
-        Payment payment = getPaymentBySessionId(sessionId);
+        return handlePaymentCancel(sessionId, null);
+    }
 
-        if (stripePaymentProvider.isPaymentSessionActive(sessionId)) {
+    @Transactional
+    public PaymentCancelResult handlePaymentCancel(String sessionId, Long bookingId) {
+        Payment payment = resolvePaymentForCancel(sessionId, bookingId);
+        String resolvedSessionId = payment.getSessionId();
+
+        if (stripePaymentProvider.isPaymentSessionActive(resolvedSessionId)) {
             return new PaymentCancelResult(
                     payment.getId(),
                     payment.getSessionId(),
                     payment.getSessionUrl(),
                     payment.getStatus(),
                     true,
-                    "Payment was canceled on the provider page, "
-                            + "but the session is still active and can be completed later."
+                    "Payment was canceled on the provider page. "
+                            + "You can pay later using the same session for a limited time."
             );
         }
 
@@ -141,7 +147,7 @@ public class PaymentService {
                 savedPayment.getStatus(),
                 false,
                 "Payment session is no longer active. "
-                        + "A new checkout session will be required."
+                        + "Create a new checkout session if you want to pay later."
         );
     }
 
@@ -213,5 +219,22 @@ public class PaymentService {
         return paymentRepository.findBySessionId(sessionId)
                 .orElseThrow(() -> new EntityNotFoundDomainException(
                         "Payment with session id '" + sessionId + "' was not found"));
+    }
+
+    private Payment resolvePaymentForCancel(String sessionId, Long bookingId) {
+        if (sessionId != null && !sessionId.isBlank()) {
+            return getPaymentBySessionId(sessionId);
+        }
+
+        if (bookingId == null) {
+            throw new BusinessValidationException(
+                    "Either session_id or booking_id must be provided"
+            );
+        }
+
+        return paymentRepository.findByBookingId(bookingId)
+                .orElseThrow(() -> new EntityNotFoundDomainException(
+                        "Payment for booking id '" + bookingId + "' was not found"
+                ));
     }
 }

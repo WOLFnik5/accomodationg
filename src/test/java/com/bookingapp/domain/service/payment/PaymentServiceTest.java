@@ -163,6 +163,23 @@ class PaymentServiceTest {
     }
 
     @Test
+    void getPaymentsShouldReturnAllPaymentsForAdminWhenUserFilterIsMissing() {
+        CurrentUser admin = new CurrentUser(1L, "admin@example.com", UserRole.ADMIN);
+        PaymentFilterQuery query = new PaymentFilterQuery(null);
+        List<Payment> expected = List.of(
+                new Payment(100L, PaymentStatus.PENDING, 11L, "https://checkout.example/sess_123", "sess_123", BigDecimal.valueOf(450)),
+                new Payment(101L, PaymentStatus.PAID, 12L, "https://checkout.example/sess_124", "sess_124", BigDecimal.valueOf(300))
+        );
+
+        when(currentUserService.getCurrentUser()).thenReturn(admin);
+        when(paymentRepository.findAllByFilter(query)).thenReturn(expected);
+
+        List<Payment> result = paymentService.getPayments(query);
+
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
     void getPaymentsShouldRestrictCustomerToOwnPayments() {
         CurrentUser currentUser = new CurrentUser(15L, "customer@example.com", UserRole.CUSTOMER);
         List<Payment> expected = List.of(
@@ -196,6 +213,7 @@ class PaymentServiceTest {
         assertThat(result.paymentId()).isEqualTo(100L);
         assertThat(result.canBeCompletedLater()).isTrue();
         assertThat(result.paymentStatus()).isEqualTo(PaymentStatus.PENDING);
+        assertThat(result.message()).contains("pay later");
         verify(paymentRepository, never()).save(any(Payment.class));
     }
 
@@ -218,7 +236,29 @@ class PaymentServiceTest {
 
         assertThat(result.paymentStatus()).isEqualTo(PaymentStatus.EXPIRED);
         assertThat(result.canBeCompletedLater()).isFalse();
+        assertThat(result.message()).contains("Create a new checkout session");
         verify(paymentRepository).save(any(Payment.class));
+    }
+
+    @Test
+    void handlePaymentCancelShouldResolvePaymentByBookingIdWhenSessionIdIsMissing() {
+        Payment pendingPayment = new Payment(
+                100L,
+                PaymentStatus.PENDING,
+                11L,
+                "https://checkout.example/sess_123",
+                "sess_123",
+                BigDecimal.valueOf(450)
+        );
+
+        when(paymentRepository.findByBookingId(11L)).thenReturn(Optional.of(pendingPayment));
+        when(stripePaymentProvider.isPaymentSessionActive("sess_123")).thenReturn(true);
+
+        var result = paymentService.handlePaymentCancel(null, 11L);
+
+        assertThat(result.paymentId()).isEqualTo(100L);
+        assertThat(result.sessionId()).isEqualTo("sess_123");
+        assertThat(result.canBeCompletedLater()).isTrue();
     }
 
     @Test

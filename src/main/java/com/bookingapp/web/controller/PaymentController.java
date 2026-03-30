@@ -75,8 +75,12 @@ public class PaymentController {
     @GetMapping("/cancel")
     @Operation(summary = "Handle canceled payment callback")
     public PaymentCancelResponse handlePaymentCancel(
-            @RequestParam(name = "session_id") String sessionId
+            @RequestParam(name = "session_id", required = false) String sessionId,
+            @RequestParam(name = "booking_id", required = false) Long bookingId
     ) {
-        return paymentWebMapper.toCancelResponse(paymentService.handlePaymentCancel(sessionId));
+        return paymentWebMapper.toCancelResponse(paymentService.handlePaymentCancel(
+                sessionId,
+                bookingId
+        ));
     }
 }
