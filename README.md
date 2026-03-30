@@ -1,6 +1,20 @@
-# Booking App
+# Accommodation Booking Service
 
-Booking App is a Spring Boot backend for managing accommodations, bookings, payments, and operational notifications. It exposes a JWT-secured REST API, stores data in PostgreSQL, publishes business events through an outbox-backed Kafka flow, creates Stripe checkout sessions, and delivers Telegram notifications for selected events.
+This project is a Java 21 / Spring Boot 4 backend for accommodation booking management. It provides JWT-secured REST APIs for authentication, accommodation catalog management, bookings, payments, and operational notifications, while keeping a layered architecture built around `domain`, `web`, and `infrastructure`.
+
+## Overview
+
+The service supports:
+
+- customer registration and login
+- public accommodation browsing
+- admin accommodation management
+- booking creation, update, cancellation, and listing
+- Stripe checkout session creation and payment completion handling
+- Kafka-based event publishing through an outbox flow
+- Telegram notifications for selected business events
+- scheduled booking expiration
+- schema management with Liquibase
 
 ## Tech Stack
 
@@ -17,142 +31,222 @@ Booking App is a Spring Boot backend for managing accommodations, bookings, paym
 - springdoc OpenAPI / Swagger UI
 - Maven
 - Docker / Docker Compose
-- JUnit 5, Mockito, Testcontainers
+- JUnit 5, Mockito, Testcontainers, JaCoCo
 
-## Architecture
+## Architecture Summary
 
-The project now follows a pragmatic 3-tier layered architecture:
+The application keeps the existing 3-layer structure:
 
 - `com.bookingapp.domain`
-  Business core: domain models, enums, exceptions, domain events, repository contracts, business services, and a small set of service DTOs.
+  Business core: domain models, enums, domain events, repository contracts, business exceptions, and services.
 - `com.bookingapp.web`
-  HTTP layer: controllers, request/response DTOs, web mappers, and API exception handling.
+  HTTP API layer: controllers, request/response DTOs, web mappers, and API exception handling.
 - `com.bookingapp.infrastructure`
-  Technical implementation details: persistence, Kafka, outbox publishing, Stripe, Telegram, security, configuration, and scheduler components.
+  Technical adapters: persistence, JPA entities/repositories, security, Kafka, outbox publishing, Stripe, Telegram, configuration, and schedulers.
 
-Primary runtime flow:
+Main synchronous flow:
 
 `Controller -> Service -> Repository / Infrastructure`
 
-Typical examples:
+Main asynchronous flow:
 
-- `web.controller.AuthController -> domain.service.AuthService -> domain.repository.UserRepository + infrastructure.security.JwtTokenService`
-- `web.controller.BookingController -> domain.service.BookingService -> domain.repository.BookingRepository + infrastructure.kafka.KafkaEventPublisher`
-- `web.controller.PaymentController -> domain.service.PaymentService -> domain.repository.PaymentRepository + infrastructure.stripe.StripePaymentProvider`
+`Service -> outbox event persistence -> OutboxKafkaPublisher -> Kafka -> Telegram consumer/notification service`
 
-Asynchronous event flow:
+## Environment Configuration
 
-`Service -> KafkaEventPublisher -> outbox table -> OutboxKafkaPublisher -> Kafka -> TelegramEventConsumer -> TelegramNotificationService`
+Secrets and integration settings are externalized through environment variables. Start by copying `.env.sample` to `.env` and adjusting values if needed.
 
-## Package Responsibilities
+```bash
+cp .env.sample .env
+```
 
-### Domain
+Important convention used by this project:
 
-- `domain.model`
-  Immutable-style business entities such as `Accommodation`, `Booking`, `Payment`, and `User`.
-- `domain.repository`
-  Repository contracts used by services.
-- `domain.service`
-  Business orchestration and transactional use cases implemented as concrete services.
-- `domain.service.dto`
-  Small service-level contracts that still add value:
-  `AuthenticationResult`, `BookingFilterQuery`, `PaymentFilterQuery`, `PaymentSessionResult`, `PaymentCancelResult`, `BookingExpirationResult`, `CurrentUser`.
+- `.env` is the source of truth for local development.
+- Local development values target services exposed on the host machine.
+- `docker-compose.yml` overrides only the `booking-app` container connection variables that must point to internal Compose service names.
 
-### Web
+Default local development values in `.env.sample` assume:
 
-- `web.controller`
-  REST endpoints and request handling.
-- `web.dto`
-  External API request/response DTOs.
-- `web.mapper`
-  Mapping between domain/service results and API DTOs.
-- `web.exception`
-  API-facing exception translation.
+- PostgreSQL is reachable at `localhost:5433`
+- Kafka is reachable at `localhost:9092`
+- the app runs on `localhost:8080`
 
-### Infrastructure
+Required variables you should review before demo/use:
 
-- `infrastructure.persistence`
-  Repository implementations, JPA entities, persistence mappers, Spring Data repositories, and outbox persistence.
-- `infrastructure.kafka`
-  Event publisher contract/implementation, Kafka consumer, and event message formatting.
-- `infrastructure.outbox`
-  Scheduled outbox delivery to Kafka.
-- `infrastructure.stripe`
-  Stripe checkout integration.
-- `infrastructure.telegram`
-  Telegram client, formatting, and notification delivery.
-- `infrastructure.security`
-  JWT auth, current-user resolution, and Spring Security integration.
-- `infrastructure.config`
-  Spring Boot configuration and typed properties.
-- `infrastructure.scheduler`
-  Scheduled booking expiration trigger.
+- `JWT_SECRET`
+- `STRIPE_SECRET_KEY`
+- `TELEGRAM_BOT_TOKEN`
+- `TELEGRAM_CHAT_ID`
 
-## Features
+Database variables:
 
-- Customer registration and login with JWT authentication
-- Public accommodation browsing
-- Admin accommodation management
-- Booking creation, update, cancellation, and listing
-- Stripe checkout session creation and payment completion handling
-- Kafka event publishing with outbox persistence
-- Telegram notifications for selected business events
-- Scheduled expiration of stale bookings
-- Liquibase schema management
+- `DB_HOST`
+- `DB_PORT`
+- `DB_NAME`
+- `DB_USERNAME`
+- `DB_PASSWORD`
+- `POSTGRES_DB`
 
-## Running Locally
+## Setup Instructions
 
-### Prerequisites
+Prerequisites:
 
 - Java 21
 - Maven 3.9+
-- PostgreSQL and Kafka, or Docker Compose
+- Docker Desktop or a compatible Docker engine if you want Compose-based dependencies/runtime
 
-### Start the application
+## Local Run
+
+Use this mode when you want to run Spring Boot on your machine and keep PostgreSQL/Kafka externalized.
+
+1. Copy `.env.sample` to `.env`.
+2. Start infrastructure dependencies:
+
+```bash
+docker compose up postgres kafka kafka-ui -d
+```
+
+3. Run the application:
 
 ```bash
 mvn spring-boot:run
 ```
 
-Default URL:
+The default local configuration from `application.yml` matches the host ports exposed by Docker Compose:
 
-```text
-http://localhost:8080
-```
+- PostgreSQL: `localhost:5433`
+- Kafka: `localhost:9092`
+- Application: `http://localhost:8080`
 
-### Docker Compose
+## Docker Compose Run
+
+Use this mode when you want the full stack, including the application, in containers.
 
 ```bash
 docker compose up --build
 ```
 
-Useful endpoints:
+In Compose mode:
 
-- Application: `http://localhost:8080`
+- PostgreSQL runs as `postgres:5432` inside the Compose network
+- Kafka runs as `kafka:29092` inside the Compose network
+- the `booking-app` container gets those internal addresses from `docker-compose.yml`
+
+Public URLs after startup:
+
+- API base URL: `http://localhost:8080`
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
+- OpenAPI docs: `http://localhost:8080/api-docs`
+- Custom health endpoint: `http://localhost:8080/health`
+- Actuator health: `http://localhost:8080/actuator/health`
 - Kafka UI: `http://localhost:8081`
 
-## Testing
+## Health Endpoints
 
-The test suite mirrors the layered structure:
+The project exposes:
 
-- `src/test/java/com/bookingapp/web`
-  MVC and controller integration tests
-- `src/test/java/com/bookingapp/domain/service`
-  service tests
-- `src/test/java/com/bookingapp/infrastructure`
-  persistence and messaging tests
-- `src/test/java/com/bookingapp/integration`
-  broader integration coverage
-- `src/test/java/com/bookingapp/testsupport`
-  shared PostgreSQL and Liquibase test harnesses
+- `GET /health`
+  Public custom health endpoint returning:
+  `{"status":"UP"}`
+- `GET /actuator/health`
+  Public Spring Boot actuator health endpoint
 
-Run tests with:
+## API Summary
+
+Main business endpoints:
+
+- `POST /auth/register`
+  Register a new customer account.
+- `POST /auth/login`
+  Authenticate and receive a bearer token.
+- `GET /accommodations`
+  Public accommodation listing.
+- `GET /accommodations/{id}`
+  Public accommodation details.
+- `POST /accommodations`
+  Admin-only accommodation creation.
+- `PUT /accommodations/{id}`
+  Admin-only full accommodation update.
+- `PATCH /accommodations/{id}`
+  Admin-only partial accommodation update.
+- `DELETE /accommodations/{id}`
+  Admin-only accommodation deletion.
+- `GET /bookings`
+  Authenticated booking list with role-based behavior.
+- `GET /bookings/{id}`
+  Authenticated booking details.
+- `POST /bookings`
+  Authenticated booking creation.
+- `PUT /bookings/{id}`
+  Authenticated booking update.
+- `PATCH /bookings/{id}`
+  Authenticated booking partial update.
+- `DELETE /bookings/{id}`
+  Authenticated booking cancellation/deletion flow.
+- `POST /payments`
+  Authenticated payment/checkout session creation.
+- `GET /payments/success`
+  Public Stripe success callback endpoint.
+- `GET /payments/cancel`
+  Public Stripe cancel callback endpoint.
+- `GET /users/me`
+  Authenticated current-user profile endpoint.
+- `PUT /users/{id}/role`
+  Admin-only role update.
+
+Swagger is available at [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html).
+
+## Roles and Permissions
+
+- Anonymous users:
+  `POST /auth/**`, `GET /health`, `GET /actuator/health`, payment callback endpoints, Swagger/OpenAPI endpoints, and public accommodation reads.
+- `CUSTOMER`:
+  authenticated booking/payment operations allowed by controller/service rules and access to their own profile.
+- `ADMIN`:
+  accommodation management and user role management, plus authenticated endpoints available to regular users where applicable.
+
+## Payments and Notifications
+
+Stripe setup notes:
+
+- set `STRIPE_SECRET_KEY`
+- verify `STRIPE_SUCCESS_URL` and `STRIPE_CANCEL_URL`
+- local defaults point to `http://localhost:8080/payments/success` and `http://localhost:8080/payments/cancel`
+
+Telegram setup notes:
+
+- set `TELEGRAM_BOT_TOKEN`
+- set `TELEGRAM_CHAT_ID`
+
+Kafka / eventing notes:
+
+- Kafka is required for the outbox-to-notification flow
+- the app publishes business events to Kafka topics configured by environment variables
+
+## Testing and Coverage
+
+Run the full verification pipeline:
+
+```bash
+mvn clean verify
+```
+
+Run tests only:
 
 ```bash
 mvn test
 ```
 
-## README Architecture Summary
+Coverage:
 
-Booking App is organized around three layers: `domain` for business rules and repository contracts, `web` for the HTTP API, and `infrastructure` for persistence, security, messaging, and external integrations. The main request path is `Controller -> Service -> Repository/Infrastructure`, while asynchronous notifications flow through an outbox-backed Kafka pipeline.
+- JaCoCo report is generated during `verify`
+- the HTML report is produced under `target/site/jacoco/index.html`
+- the build fails when overall line coverage for project code drops below 60%
+- the Spring Boot bootstrap class `BookingAppApplication` is excluded from the JaCoCo gate because it contains only framework startup boilerplate
+
+## Known Assumptions
+
+- `.env` should be treated as the local development contract; do not commit real secrets.
+- Local non-container app startup is expected to use the host-exposed Compose dependency ports by default.
+- Full Compose startup uses internal service names for app-to-database and app-to-Kafka communication.
