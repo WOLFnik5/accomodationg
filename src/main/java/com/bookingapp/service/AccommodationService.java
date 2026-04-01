@@ -11,7 +11,6 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import com.bookingapp.web.dto.PatchAccommodationRequest;
-import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

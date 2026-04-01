@@ -1,6 +1,5 @@
 package com.bookingapp.web.mapper;
 
-import com.bookingapp.exception.BusinessValidationException;
 import com.bookingapp.domain.model.User;
 import com.bookingapp.web.dto.UserProfileResponse;
 import org.springframework.stereotype.Component;

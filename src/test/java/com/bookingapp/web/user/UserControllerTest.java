@@ -2,6 +2,7 @@ package com.bookingapp.web.user;
 
 import com.bookingapp.web.ControllerTestSecurityConfig;
 import com.bookingapp.web.controller.UserController;
+import com.bookingapp.web.dto.PatchCurrentUserRequest;
 import com.bookingapp.web.mapper.UserWebMapper;
 import com.bookingapp.service.UserService;
 import com.bookingapp.exception.GlobalExceptionHandler;
@@ -70,10 +71,7 @@ class UserControllerTest {
 
     @Test
     void patchCurrentUserProfileShouldReturnUpdatedJson() throws Exception {
-        when(userService.getCurrentUserProfile()).thenReturn(
-                new User(5L, "user@example.com", "John", "Doe", "encoded", UserRole.CUSTOMER)
-        );
-        when(userService.updateCurrentUserProfile(anyString(), anyString(), anyString())).thenReturn(
+        when(userService.patchCurrentUserProfile(any(PatchCurrentUserRequest.class))).thenReturn(
                 new User(5L, "updated@example.com", "Jane", "Doe", "encoded", UserRole.CUSTOMER)
         );
 
@@ -81,11 +79,11 @@ class UserControllerTest {
                         .with(user("user@example.com").roles("CUSTOMER"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {
-                                  "email": "updated@example.com",
-                                  "firstName": "Jane"
-                                }
-                                """))
+                            {
+                              "email": "updated@example.com",
+                              "firstName": "Jane"
+                            }
+                            """))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").value(5))
@@ -94,7 +92,7 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.lastName").value("Doe"))
                 .andExpect(jsonPath("$.role").value("CUSTOMER"));
 
-        verify(userService).updateCurrentUserProfile(anyString(), anyString(), anyString());
+        verify(userService).patchCurrentUserProfile(any(PatchCurrentUserRequest.class));
     }
 
     @Test

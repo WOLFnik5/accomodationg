@@ -8,7 +8,6 @@ import com.bookingapp.domain.repository.UserRepository;
 import com.bookingapp.service.dto.CurrentUser;
 import com.bookingapp.infrastructure.security.CurrentUserService;
 import com.bookingapp.web.dto.PatchCurrentUserRequest;
-import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
