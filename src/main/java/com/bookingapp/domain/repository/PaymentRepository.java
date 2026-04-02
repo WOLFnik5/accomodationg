@@ -1,7 +1,7 @@
 package com.bookingapp.domain.repository;
 
 import com.bookingapp.domain.model.Payment;
-import com.bookingapp.service.dto.PaymentFilterQuery;
+
 import java.util.List;
 import java.util.Optional;
 

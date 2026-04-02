@@ -2,8 +2,8 @@ package com.bookingapp.web.mapper;
 
 import com.bookingapp.domain.model.Payment;
 import com.bookingapp.domain.model.enums.PaymentStatus;
-import com.bookingapp.service.dto.PaymentCancelResult;
-import com.bookingapp.service.dto.PaymentFilterQuery;
+import com.bookingapp.web.dto.PaymentCancelResult;
+import com.bookingapp.domain.repository.PaymentFilterQuery;
 import com.bookingapp.web.dto.PaymentCancelResponse;
 import com.bookingapp.web.dto.PaymentResponse;
 import com.bookingapp.web.dto.PaymentSuccessResponse;

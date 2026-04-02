@@ -2,7 +2,7 @@ package com.bookingapp.web.controller;
 
 import com.bookingapp.domain.model.Payment;
 import com.bookingapp.service.PaymentService;
-import com.bookingapp.service.dto.PaymentSessionResult;
+import com.bookingapp.web.dto.PaymentSessionResult;
 import com.bookingapp.web.dto.CreatePaymentRequest;
 import com.bookingapp.web.dto.PaymentCancelResponse;
 import com.bookingapp.web.dto.PaymentResponse;

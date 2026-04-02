@@ -6,7 +6,7 @@ import com.bookingapp.domain.repository.UserRepository;
 import com.bookingapp.exception.BusinessValidationException;
 import com.bookingapp.exception.EntityNotFoundDomainException;
 import com.bookingapp.infrastructure.security.CurrentUserService;
-import com.bookingapp.service.dto.CurrentUser;
+import com.bookingapp.infrastructure.security.CurrentUser;
 import com.bookingapp.web.dto.PatchCurrentUserRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

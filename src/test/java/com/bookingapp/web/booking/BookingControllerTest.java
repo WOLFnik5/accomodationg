@@ -1,6 +1,6 @@
 package com.bookingapp.web.booking;
 
-import com.bookingapp.service.dto.BookingFilterQuery;
+import com.bookingapp.domain.repository.BookingFilterQuery;
 import com.bookingapp.web.ControllerTestSecurityConfig;
 import com.bookingapp.web.controller.BookingController;
 import com.bookingapp.web.mapper.BookingWebMapper;

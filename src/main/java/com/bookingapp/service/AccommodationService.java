@@ -32,8 +32,8 @@ public class AccommodationService {
             AccommodationType type,
             String location,
             String size,
-            java.util.List<String> amenities,
-            java.math.BigDecimal dailyRate,
+            List<String> amenities,
+            BigDecimal dailyRate,
             int availability
     ) {
         Accommodation accommodationToSave = Accommodation.createNew(
@@ -69,8 +69,8 @@ public class AccommodationService {
             AccommodationType type,
             String location,
             String size,
-            java.util.List<String> amenities,
-            java.math.BigDecimal dailyRate,
+            List<String> amenities,
+            BigDecimal dailyRate,
             int availability
     ) {
         Accommodation existingAccommodation = getAccommodationById(accommodationId);

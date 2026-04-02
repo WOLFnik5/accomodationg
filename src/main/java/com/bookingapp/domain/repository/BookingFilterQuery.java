@@ -1,4 +1,4 @@
-package com.bookingapp.service.dto;
+package com.bookingapp.domain.repository;
 
 import com.bookingapp.domain.model.enums.BookingStatus;
 

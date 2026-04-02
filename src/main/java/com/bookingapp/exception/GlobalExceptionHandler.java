@@ -1,5 +1,6 @@
 package com.bookingapp.exception;
 
+import com.bookingapp.web.dto.ApiErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import java.time.Instant;

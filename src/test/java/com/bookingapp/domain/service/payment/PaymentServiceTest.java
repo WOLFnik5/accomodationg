@@ -1,8 +1,8 @@
 package com.bookingapp.domain.service.payment;
 
-import com.bookingapp.service.dto.CurrentUser;
-import com.bookingapp.service.dto.PaymentFilterQuery;
-import com.bookingapp.service.dto.PaymentSessionResult;
+import com.bookingapp.infrastructure.security.CurrentUser;
+import com.bookingapp.domain.repository.PaymentFilterQuery;
+import com.bookingapp.web.dto.PaymentSessionResult;
 import com.bookingapp.service.PaymentService;
 import com.bookingapp.exception.PaymentStateException;
 import com.bookingapp.infrastructure.kafka.KafkaEventPublisher;

@@ -4,7 +4,7 @@ import com.bookingapp.domain.model.enums.BookingStatus;
 import com.bookingapp.domain.model.Booking;
 import com.bookingapp.domain.repository.BookingRepository;
 import com.bookingapp.service.BookingExpirationService;
-import com.bookingapp.service.dto.BookingExpirationResult;
+import com.bookingapp.service.BookingExpirationResult;
 import com.bookingapp.infrastructure.kafka.KafkaEventPublisher;
 import com.bookingapp.infrastructure.telegram.TelegramNotificationService;
 import org.junit.jupiter.api.Test;

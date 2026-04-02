@@ -1,6 +1,6 @@
 package com.bookingapp.domain.service.auth;
 
-import com.bookingapp.service.dto.AuthenticationResult;
+import com.bookingapp.web.dto.AuthenticationResult;
 import com.bookingapp.service.AuthService;
 import com.bookingapp.domain.repository.UserRepository;
 import com.bookingapp.infrastructure.security.JwtTokenService;

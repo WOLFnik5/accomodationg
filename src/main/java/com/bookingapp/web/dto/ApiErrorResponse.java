@@ -1,4 +1,4 @@
-package com.bookingapp.exception;
+package com.bookingapp.web.dto;
 
 import java.time.Instant;
 

@@ -1,6 +1,5 @@
 package com.bookingapp.infrastructure.security;
 
-import com.bookingapp.service.dto.CurrentUser;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

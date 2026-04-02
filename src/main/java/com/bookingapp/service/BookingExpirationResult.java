@@ -1,4 +1,4 @@
-package com.bookingapp.service.dto;
+package com.bookingapp.service;
 
 import java.util.List;
 

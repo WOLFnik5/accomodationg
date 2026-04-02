@@ -1,6 +1,6 @@
 package com.bookingapp.domain.service.user;
 
-import com.bookingapp.service.dto.CurrentUser;
+import com.bookingapp.infrastructure.security.CurrentUser;
 import com.bookingapp.service.UserService;
 import com.bookingapp.domain.repository.UserRepository;
 import com.bookingapp.infrastructure.security.CurrentUserService;

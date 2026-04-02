@@ -1,4 +1,4 @@
-package com.bookingapp.service.dto;
+package com.bookingapp.web.dto;
 
 import com.bookingapp.domain.model.enums.UserRole;
 

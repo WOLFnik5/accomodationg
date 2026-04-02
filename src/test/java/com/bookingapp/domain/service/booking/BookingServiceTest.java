@@ -1,7 +1,7 @@
 package com.bookingapp.domain.service.booking;
 
-import com.bookingapp.service.dto.BookingFilterQuery;
-import com.bookingapp.service.dto.CurrentUser;
+import com.bookingapp.domain.repository.BookingFilterQuery;
+import com.bookingapp.infrastructure.security.CurrentUser;
 import com.bookingapp.service.BookingService;
 import com.bookingapp.infrastructure.kafka.KafkaEventPublisher;
 import com.bookingapp.domain.repository.AccommodationRepository;

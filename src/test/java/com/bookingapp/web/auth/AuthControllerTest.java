@@ -1,7 +1,7 @@
 package com.bookingapp.web.auth;
 
 import com.bookingapp.web.controller.AuthController;
-import com.bookingapp.service.dto.AuthenticationResult;
+import com.bookingapp.web.dto.AuthenticationResult;
 import com.bookingapp.service.AuthService;
 import com.bookingapp.exception.GlobalExceptionHandler;
 import com.bookingapp.domain.model.enums.UserRole;

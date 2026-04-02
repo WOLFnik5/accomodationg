@@ -1,9 +1,9 @@
 package com.bookingapp.web.payment;
 
-import com.bookingapp.service.dto.PaymentFilterQuery;
+import com.bookingapp.domain.repository.PaymentFilterQuery;
 import com.bookingapp.web.dto.CreatePaymentRequest;
 import com.bookingapp.web.support.AbstractControllerIntegrationTest;
-import com.bookingapp.service.dto.PaymentSessionResult;
+import com.bookingapp.web.dto.PaymentSessionResult;
 import com.bookingapp.domain.model.enums.AccommodationType;
 import com.bookingapp.domain.model.enums.BookingStatus;
 import com.bookingapp.domain.model.enums.PaymentStatus;
