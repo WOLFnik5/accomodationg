@@ -2,9 +2,9 @@ package com.bookingapp.service;
 
 import com.bookingapp.domain.model.User;
 import com.bookingapp.domain.model.enums.UserRole;
-import com.bookingapp.domain.repository.UserRepository;
 import com.bookingapp.exception.BusinessValidationException;
 import com.bookingapp.infrastructure.security.JwtTokenService;
+import com.bookingapp.persistence.UserRepositoryImpl;
 import com.bookingapp.web.dto.AuthenticationResult;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,12 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class AuthService {
 
-    private final UserRepository userRepository;
+    private final UserRepositoryImpl userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenService jwtTokenService;
 
     public AuthService(
-            UserRepository userRepository,
+            UserRepositoryImpl userRepository,
             PasswordEncoder passwordEncoder,
             JwtTokenService jwtTokenService
     ) {

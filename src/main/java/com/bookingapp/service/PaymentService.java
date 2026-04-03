@@ -6,11 +6,6 @@ import com.bookingapp.domain.model.Payment;
 import com.bookingapp.domain.model.User;
 import com.bookingapp.domain.model.enums.PaymentStatus;
 import com.bookingapp.domain.model.enums.UserRole;
-import com.bookingapp.domain.repository.AccommodationRepository;
-import com.bookingapp.domain.repository.BookingRepository;
-import com.bookingapp.domain.repository.PaymentFilterQuery;
-import com.bookingapp.domain.repository.PaymentRepository;
-import com.bookingapp.domain.repository.UserRepository;
 import com.bookingapp.exception.BusinessValidationException;
 import com.bookingapp.exception.EntityNotFoundDomainException;
 import com.bookingapp.exception.ForbiddenOperationException;
@@ -19,6 +14,11 @@ import com.bookingapp.infrastructure.kafka.KafkaEventPublisher;
 import com.bookingapp.infrastructure.security.CurrentUser;
 import com.bookingapp.infrastructure.security.CurrentUserService;
 import com.bookingapp.infrastructure.stripe.StripePaymentProvider;
+import com.bookingapp.persistence.AccommodationRepositoryImpl;
+import com.bookingapp.persistence.BookingRepositoryImpl;
+import com.bookingapp.persistence.PaymentFilterQuery;
+import com.bookingapp.persistence.PaymentRepositoryImpl;
+import com.bookingapp.persistence.UserRepositoryImpl;
 import com.bookingapp.web.dto.PaymentCancelResult;
 import com.bookingapp.web.dto.PaymentSessionResult;
 import java.math.BigDecimal;
@@ -31,19 +31,19 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class PaymentService {
 
-    private final PaymentRepository paymentRepository;
-    private final BookingRepository bookingRepository;
-    private final AccommodationRepository accommodationRepository;
-    private final UserRepository userRepository;
+    private final PaymentRepositoryImpl paymentRepository;
+    private final BookingRepositoryImpl bookingRepository;
+    private final AccommodationRepositoryImpl accommodationRepository;
+    private final UserRepositoryImpl userRepository;
     private final CurrentUserService currentUserService;
     private final StripePaymentProvider stripePaymentProvider;
     private final KafkaEventPublisher kafkaEventPublisher;
 
     public PaymentService(
-            PaymentRepository paymentRepository,
-            BookingRepository bookingRepository,
-            AccommodationRepository accommodationRepository,
-            UserRepository userRepository,
+            PaymentRepositoryImpl paymentRepository,
+            BookingRepositoryImpl bookingRepository,
+            AccommodationRepositoryImpl accommodationRepository,
+            UserRepositoryImpl userRepository,
             CurrentUserService currentUserService,
             StripePaymentProvider stripePaymentProvider,
             KafkaEventPublisher kafkaEventPublisher

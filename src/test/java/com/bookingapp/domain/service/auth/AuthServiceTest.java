@@ -1,8 +1,8 @@
 package com.bookingapp.domain.service.auth;
 
 import com.bookingapp.web.dto.AuthenticationResult;
+import com.bookingapp.persistence.UserRepositoryImpl;
 import com.bookingapp.service.AuthService;
-import com.bookingapp.domain.repository.UserRepository;
 import com.bookingapp.infrastructure.security.JwtTokenService;
 import com.bookingapp.domain.model.enums.UserRole;
 import com.bookingapp.exception.BusinessValidationException;
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 class AuthServiceTest {
 
     @Mock
-    private UserRepository userRepository;
+    private UserRepositoryImpl userRepository;
 
     @Mock
     private PasswordEncoder passwordEncoder;

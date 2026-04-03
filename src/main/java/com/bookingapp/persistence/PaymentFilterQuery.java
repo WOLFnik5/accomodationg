@@ -1,4 +1,4 @@
-package com.bookingapp.domain.repository;
+package com.bookingapp.persistence;
 
 public record PaymentFilterQuery(
         Long userId

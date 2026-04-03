@@ -2,11 +2,11 @@ package com.bookingapp.service;
 
 import com.bookingapp.domain.model.User;
 import com.bookingapp.domain.model.enums.UserRole;
-import com.bookingapp.domain.repository.UserRepository;
 import com.bookingapp.exception.BusinessValidationException;
 import com.bookingapp.exception.EntityNotFoundDomainException;
 import com.bookingapp.infrastructure.security.CurrentUser;
 import com.bookingapp.infrastructure.security.CurrentUserService;
+import com.bookingapp.persistence.UserRepositoryImpl;
 import com.bookingapp.web.dto.PatchCurrentUserRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,11 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class UserService {
 
-    private final UserRepository userRepository;
+    private final UserRepositoryImpl userRepository;
     private final CurrentUserService currentUserService;
 
     public UserService(
-            UserRepository userRepository,
+            UserRepositoryImpl userRepository,
             CurrentUserService currentUserService
     ) {
         this.userRepository = userRepository;

@@ -1,13 +1,13 @@
 package com.bookingapp.domain.service.booking;
 
-import com.bookingapp.domain.repository.BookingFilterQuery;
+import com.bookingapp.persistence.BookingFilterQuery;
 import com.bookingapp.infrastructure.security.CurrentUser;
 import com.bookingapp.service.BookingService;
 import com.bookingapp.infrastructure.kafka.KafkaEventPublisher;
-import com.bookingapp.domain.repository.AccommodationRepository;
-import com.bookingapp.domain.repository.BookingRepository;
-import com.bookingapp.domain.repository.PaymentRepository;
 import com.bookingapp.infrastructure.security.CurrentUserService;
+import com.bookingapp.persistence.AccommodationRepositoryImpl;
+import com.bookingapp.persistence.BookingRepositoryImpl;
+import com.bookingapp.persistence.PaymentRepositoryImpl;
 import com.bookingapp.domain.model.enums.AccommodationType;
 import com.bookingapp.domain.model.enums.BookingStatus;
 import com.bookingapp.domain.model.enums.PaymentStatus;
@@ -42,13 +42,13 @@ import static org.mockito.Mockito.when;
 class BookingServiceTest {
 
     @Mock
-    private BookingRepository bookingRepository;
+    private BookingRepositoryImpl bookingRepository;
 
     @Mock
-    private AccommodationRepository accommodationRepository;
+    private AccommodationRepositoryImpl accommodationRepository;
 
     @Mock
-    private PaymentRepository paymentRepository;
+    private PaymentRepositoryImpl paymentRepository;
 
     @Mock
     private CurrentUserService currentUserService;

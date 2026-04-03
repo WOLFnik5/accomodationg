@@ -8,9 +8,8 @@ import com.bookingapp.domain.event.BookingCanceledEvent;
 import com.bookingapp.domain.event.BookingCreatedEvent;
 import com.bookingapp.domain.event.BookingExpiredEvent;
 import com.bookingapp.domain.event.PaymentSucceededEvent;
+import com.bookingapp.infrastructure.telegram.TelegramMessageFormatter;   // ← змінено
 import com.bookingapp.infrastructure.telegram.TelegramNotificationService;
-import com.bookingapp.infrastructure.kafka.TelegramEventConsumer;
-import com.bookingapp.infrastructure.kafka.TelegramEventMessageFormatter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -22,10 +21,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class TelegramEventConsumerTest {
+
     private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
 
     @Mock
-    private TelegramEventMessageFormatter telegramEventMessageFormatter;
+    private TelegramMessageFormatter telegramMessageFormatter;        // ← змінено
 
     @Mock
     private TelegramNotificationService telegramNotificationService;
@@ -34,7 +34,7 @@ class TelegramEventConsumerTest {
     void consumeBookingCreated_shouldDeserializePayloadFormatMessageAndSendNotification() throws Exception {
         TelegramEventConsumer consumer = new TelegramEventConsumer(
                 objectMapper,
-                telegramEventMessageFormatter,
+                telegramMessageFormatter,          // ← змінено
                 telegramNotificationService
         );
 
@@ -49,12 +49,13 @@ class TelegramEventConsumerTest {
         );
 
         String payload = objectMapper.writeValueAsString(event);
-        when(telegramEventMessageFormatter.formatBookingCreatedEvent(event))
+
+        when(telegramMessageFormatter.formatBookingCreatedEvent(event))   // ← змінено
                 .thenReturn("booking created message");
 
         consumer.consumeBookingCreated(payload);
 
-        verify(telegramEventMessageFormatter).formatBookingCreatedEvent(event);
+        verify(telegramMessageFormatter).formatBookingCreatedEvent(event);   // ← змінено
         verify(telegramNotificationService).sendMessage("booking created message");
     }
 
@@ -62,7 +63,7 @@ class TelegramEventConsumerTest {
     void consumeBookingCanceled_shouldDeserializePayloadFormatMessageAndSendNotification() throws Exception {
         TelegramEventConsumer consumer = new TelegramEventConsumer(
                 objectMapper,
-                telegramEventMessageFormatter,
+                telegramMessageFormatter,
                 telegramNotificationService
         );
 
@@ -74,12 +75,13 @@ class TelegramEventConsumerTest {
         );
 
         String payload = objectMapper.writeValueAsString(event);
-        when(telegramEventMessageFormatter.formatBookingCanceledEvent(event))
+
+        when(telegramMessageFormatter.formatBookingCanceledEvent(event))   // ← змінено
                 .thenReturn("booking canceled message");
 
         consumer.consumeBookingCanceled(payload);
 
-        verify(telegramEventMessageFormatter).formatBookingCanceledEvent(event);
+        verify(telegramMessageFormatter).formatBookingCanceledEvent(event);   // ← змінено
         verify(telegramNotificationService).sendMessage("booking canceled message");
     }
 
@@ -87,7 +89,7 @@ class TelegramEventConsumerTest {
     void consumeAccommodationCreated_shouldDeserializePayloadFormatMessageAndSendNotification() throws Exception {
         TelegramEventConsumer consumer = new TelegramEventConsumer(
                 objectMapper,
-                telegramEventMessageFormatter,
+                telegramMessageFormatter,
                 telegramNotificationService
         );
 
@@ -101,12 +103,13 @@ class TelegramEventConsumerTest {
         );
 
         String payload = objectMapper.writeValueAsString(event);
-        when(telegramEventMessageFormatter.formatAccommodationCreatedEvent(event))
+
+        when(telegramMessageFormatter.formatAccommodationCreatedEvent(event))   // ← змінено
                 .thenReturn("accommodation created message");
 
         consumer.consumeAccommodationCreated(payload);
 
-        verify(telegramEventMessageFormatter).formatAccommodationCreatedEvent(event);
+        verify(telegramMessageFormatter).formatAccommodationCreatedEvent(event);   // ← змінено
         verify(telegramNotificationService).sendMessage("accommodation created message");
     }
 
@@ -114,7 +117,7 @@ class TelegramEventConsumerTest {
     void consumePaymentSucceeded_shouldDeserializePayloadFormatMessageAndSendNotification() throws Exception {
         TelegramEventConsumer consumer = new TelegramEventConsumer(
                 objectMapper,
-                telegramEventMessageFormatter,
+                telegramMessageFormatter,
                 telegramNotificationService
         );
 
@@ -127,12 +130,13 @@ class TelegramEventConsumerTest {
         );
 
         String payload = objectMapper.writeValueAsString(event);
-        when(telegramEventMessageFormatter.formatPaymentSucceededEvent(event))
+
+        when(telegramMessageFormatter.formatPaymentSucceededEvent(event))   // ← змінено
                 .thenReturn("payment succeeded message");
 
         consumer.consumePaymentSucceeded(payload);
 
-        verify(telegramEventMessageFormatter).formatPaymentSucceededEvent(event);
+        verify(telegramMessageFormatter).formatPaymentSucceededEvent(event);   // ← змінено
         verify(telegramNotificationService).sendMessage("payment succeeded message");
     }
 
@@ -140,7 +144,7 @@ class TelegramEventConsumerTest {
     void consumeBookingExpired_shouldDeserializePayloadFormatMessageAndSendNotification() throws Exception {
         TelegramEventConsumer consumer = new TelegramEventConsumer(
                 objectMapper,
-                telegramEventMessageFormatter,
+                telegramMessageFormatter,
                 telegramNotificationService
         );
 
@@ -152,12 +156,13 @@ class TelegramEventConsumerTest {
         );
 
         String payload = objectMapper.writeValueAsString(event);
-        when(telegramEventMessageFormatter.formatBookingExpiredEvent(event))
+
+        when(telegramMessageFormatter.formatBookingExpiredEvent(event))   // ← змінено
                 .thenReturn("booking expired message");
 
         consumer.consumeBookingExpired(payload);
 
-        verify(telegramEventMessageFormatter).formatBookingExpiredEvent(event);
+        verify(telegramMessageFormatter).formatBookingExpiredEvent(event);   // ← змінено
         verify(telegramNotificationService).sendMessage("booking expired message");
     }
 }

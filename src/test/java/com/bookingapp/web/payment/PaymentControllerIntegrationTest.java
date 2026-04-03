@@ -1,6 +1,6 @@
 package com.bookingapp.web.payment;
 
-import com.bookingapp.domain.repository.PaymentFilterQuery;
+import com.bookingapp.persistence.PaymentFilterQuery;
 import com.bookingapp.web.dto.CreatePaymentRequest;
 import com.bookingapp.web.support.AbstractControllerIntegrationTest;
 import com.bookingapp.web.dto.PaymentSessionResult;

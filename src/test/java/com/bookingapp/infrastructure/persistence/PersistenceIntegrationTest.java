@@ -1,6 +1,6 @@
 package com.bookingapp.infrastructure.persistence;
 
-import com.bookingapp.domain.repository.PaymentFilterQuery;
+import com.bookingapp.persistence.PaymentFilterQuery;
 import com.bookingapp.domain.model.enums.AccommodationType;
 import com.bookingapp.domain.model.enums.BookingStatus;
 import com.bookingapp.domain.model.enums.PaymentStatus;
@@ -9,10 +9,10 @@ import com.bookingapp.domain.model.Accommodation;
 import com.bookingapp.domain.model.Booking;
 import com.bookingapp.domain.model.Payment;
 import com.bookingapp.domain.model.User;
-import com.bookingapp.domain.repository.AccommodationRepository;
-import com.bookingapp.domain.repository.BookingRepository;
-import com.bookingapp.domain.repository.PaymentRepository;
-import com.bookingapp.domain.repository.UserRepository;
+import com.bookingapp.persistence.AccommodationRepositoryImpl;
+import com.bookingapp.persistence.BookingRepositoryImpl;
+import com.bookingapp.persistence.PaymentRepositoryImpl;
+import com.bookingapp.persistence.UserRepositoryImpl;
 import com.bookingapp.testsupport.PostgreSqlIntegrationTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,16 +30,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 class PersistenceIntegrationTest extends PostgreSqlIntegrationTestSupport {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserRepositoryImpl userRepository;
 
     @Autowired
-    private AccommodationRepository accommodationRepository;
+    private AccommodationRepositoryImpl accommodationRepository;
 
     @Autowired
-    private BookingRepository bookingRepository;
+    private BookingRepositoryImpl bookingRepository;
 
     @Autowired
-    private PaymentRepository paymentRepository;
+    private PaymentRepositoryImpl paymentRepository;
 
     @Test
     void shouldSaveAndReadUser() {

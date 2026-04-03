@@ -2,10 +2,10 @@ package com.bookingapp.service;
 
 import com.bookingapp.domain.model.Booking;
 import com.bookingapp.domain.model.enums.BookingStatus;
-import com.bookingapp.domain.repository.BookingRepository;
 import com.bookingapp.exception.InvalidBookingStateException;
 import com.bookingapp.infrastructure.kafka.KafkaEventPublisher;
 import com.bookingapp.infrastructure.telegram.TelegramNotificationService;
+import com.bookingapp.persistence.BookingRepositoryImpl;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -15,12 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class BookingExpirationService {
 
-    private final BookingRepository bookingRepository;
+    private final BookingRepositoryImpl bookingRepository;
     private final KafkaEventPublisher kafkaEventPublisher;
     private final TelegramNotificationService telegramNotificationService;
 
     public BookingExpirationService(
-            BookingRepository bookingRepository,
+            BookingRepositoryImpl bookingRepository,
             KafkaEventPublisher kafkaEventPublisher,
             TelegramNotificationService telegramNotificationService
     ) {

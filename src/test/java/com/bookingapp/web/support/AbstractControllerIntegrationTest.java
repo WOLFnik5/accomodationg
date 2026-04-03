@@ -1,10 +1,10 @@
 package com.bookingapp.web.support;
 
-import com.bookingapp.domain.repository.AccommodationRepository;
-import com.bookingapp.domain.repository.BookingRepository;
 import com.bookingapp.infrastructure.kafka.KafkaEventPublisher;
-import com.bookingapp.domain.repository.PaymentRepository;
-import com.bookingapp.domain.repository.UserRepository;
+import com.bookingapp.persistence.AccommodationRepositoryImpl;
+import com.bookingapp.persistence.BookingRepositoryImpl;
+import com.bookingapp.persistence.PaymentRepositoryImpl;
+import com.bookingapp.persistence.UserRepositoryImpl;
 import com.bookingapp.domain.model.enums.AccommodationType;
 import com.bookingapp.domain.model.enums.BookingStatus;
 import com.bookingapp.domain.model.enums.PaymentStatus;
@@ -30,7 +30,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -57,16 +57,16 @@ public abstract class AbstractControllerIntegrationTest extends PostgreSqlIntegr
     protected PasswordEncoder passwordEncoder;
 
     @Autowired
-    protected UserRepository userRepository;
+    protected UserRepositoryImpl userRepository;
 
     @Autowired
-    protected AccommodationRepository accommodationRepository;
+    protected AccommodationRepositoryImpl accommodationRepository;
 
     @Autowired
-    protected BookingRepository bookingRepository;
+    protected BookingRepositoryImpl bookingRepository;
 
     @Autowired
-    protected PaymentRepository paymentRepository;
+    protected PaymentRepositoryImpl paymentRepository;
 
     @PersistenceContext
     protected EntityManager entityManager;
@@ -77,18 +77,23 @@ public abstract class AbstractControllerIntegrationTest extends PostgreSqlIntegr
     @Autowired
     protected StripePaymentProvider stripePaymentProvider;
 
+    @Autowired
+    protected TransactionTemplate transactionTemplate;
+
     @BeforeEach
     void resetExternalMocks() {
         Mockito.reset(kafkaEventPublisher, stripePaymentProvider);
     }
 
     @AfterEach
-    @Transactional
     void cleanDatabase() {
-        entityManager.createQuery("DELETE FROM PaymentEntity").executeUpdate();
-        entityManager.createQuery("DELETE FROM BookingEntity").executeUpdate();
-        entityManager.createQuery("DELETE FROM AccommodationEntity").executeUpdate();
-        entityManager.createQuery("DELETE FROM UserEntity").executeUpdate();
+        transactionTemplate.executeWithoutResult(status -> {
+            entityManager.createQuery("DELETE FROM PaymentEntity").executeUpdate();
+            entityManager.createQuery("DELETE FROM BookingEntity").executeUpdate();
+            entityManager.createQuery("DELETE FROM AccommodationEntity").executeUpdate();
+            entityManager.createQuery("DELETE FROM UserEntity").executeUpdate();
+            entityManager.clear();
+        });
     }
 
     protected User persistAdmin(String email) {

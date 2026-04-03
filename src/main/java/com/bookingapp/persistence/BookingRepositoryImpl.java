@@ -2,8 +2,6 @@ package com.bookingapp.persistence;
 
 import com.bookingapp.domain.model.Booking;
 import com.bookingapp.domain.model.enums.BookingStatus;
-import com.bookingapp.domain.repository.BookingFilterQuery;
-import com.bookingapp.domain.repository.BookingRepository;
 import com.bookingapp.persistence.entity.BookingEntity;
 import com.bookingapp.persistence.mapper.BookingPersistenceMapper;
 import jakarta.persistence.EntityManager;
@@ -12,12 +10,12 @@ import jakarta.persistence.TypedQuery;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-@Component
+@Repository
 @Transactional(readOnly = true)
-public class BookingRepositoryImpl implements BookingRepository {
+public class BookingRepositoryImpl {
 
     private static final List<BookingStatus> INACTIVE_BOOKING_STATUSES = List.of(
             BookingStatus.CANCELED,
@@ -35,7 +33,6 @@ public class BookingRepositoryImpl implements BookingRepository {
         this.bookingPersistenceMapper = bookingPersistenceMapper;
     }
 
-    @Override
     @Transactional
     public Booking save(Booking booking) {
         BookingEntity entity = bookingPersistenceMapper.toEntity(booking);
@@ -49,14 +46,12 @@ public class BookingRepositoryImpl implements BookingRepository {
         }
     }
 
-    @Override
     public Optional<Booking> findById(Long bookingId) {
         BookingEntity entity = entityManager.find(BookingEntity.class, bookingId);
         return Optional.ofNullable(entity)
                 .map(bookingPersistenceMapper::toDomain);
     }
 
-    @Override
     public List<Booking> findAllByFilter(BookingFilterQuery query) {
         TypedQuery<BookingEntity> jpqlQuery = entityManager.createQuery(
                 """
@@ -75,7 +70,6 @@ public class BookingRepositoryImpl implements BookingRepository {
                 .toList();
     }
 
-    @Override
     public List<Booking> findAllByUserId(Long userId) {
         TypedQuery<BookingEntity> query = entityManager.createQuery(
                 """
@@ -92,7 +86,6 @@ public class BookingRepositoryImpl implements BookingRepository {
                 .toList();
     }
 
-    @Override
     public boolean existsActiveBookingOverlap(
             Long accommodationId,
             LocalDate checkInDate,
@@ -119,7 +112,6 @@ public class BookingRepositoryImpl implements BookingRepository {
         return query.getSingleResult() > 0;
     }
 
-    @Override
     public List<Booking> findBookingsToExpire(LocalDate businessDate) {
         TypedQuery<BookingEntity> query = entityManager.createQuery(
                 """

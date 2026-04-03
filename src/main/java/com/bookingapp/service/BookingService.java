@@ -6,10 +6,6 @@ import com.bookingapp.domain.model.Payment;
 import com.bookingapp.domain.model.enums.BookingStatus;
 import com.bookingapp.domain.model.enums.PaymentStatus;
 import com.bookingapp.domain.model.enums.UserRole;
-import com.bookingapp.domain.repository.AccommodationRepository;
-import com.bookingapp.domain.repository.BookingFilterQuery;
-import com.bookingapp.domain.repository.BookingRepository;
-import com.bookingapp.domain.repository.PaymentRepository;
 import com.bookingapp.exception.BookingConflictException;
 import com.bookingapp.exception.BusinessValidationException;
 import com.bookingapp.exception.EntityNotFoundDomainException;
@@ -18,6 +14,10 @@ import com.bookingapp.exception.InvalidBookingStateException;
 import com.bookingapp.infrastructure.kafka.KafkaEventPublisher;
 import com.bookingapp.infrastructure.security.CurrentUser;
 import com.bookingapp.infrastructure.security.CurrentUserService;
+import com.bookingapp.persistence.AccommodationRepositoryImpl;
+import com.bookingapp.persistence.BookingFilterQuery;
+import com.bookingapp.persistence.BookingRepositoryImpl;
+import com.bookingapp.persistence.PaymentRepositoryImpl;
 import com.bookingapp.web.dto.PatchBookingRequest;
 import java.time.LocalDate;
 import java.util.List;
@@ -28,16 +28,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class BookingService {
 
-    private final BookingRepository bookingRepository;
-    private final AccommodationRepository accommodationRepository;
-    private final PaymentRepository paymentRepository;
+    private final BookingRepositoryImpl bookingRepository;
+    private final AccommodationRepositoryImpl accommodationRepository;
+    private final PaymentRepositoryImpl paymentRepository;
     private final CurrentUserService currentUserService;
     private final KafkaEventPublisher kafkaEventPublisher;
 
     public BookingService(
-            BookingRepository bookingRepository,
-            AccommodationRepository accommodationRepository,
-            PaymentRepository paymentRepository,
+            BookingRepositoryImpl bookingRepository,
+            AccommodationRepositoryImpl accommodationRepository,
+            PaymentRepositoryImpl paymentRepository,
             CurrentUserService currentUserService,
             KafkaEventPublisher kafkaEventPublisher
     ) {

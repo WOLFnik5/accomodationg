@@ -1,8 +1,6 @@
 package com.bookingapp.persistence;
 
 import com.bookingapp.domain.model.Payment;
-import com.bookingapp.domain.repository.PaymentFilterQuery;
-import com.bookingapp.domain.repository.PaymentRepository;
 import com.bookingapp.persistence.entity.PaymentEntity;
 import com.bookingapp.persistence.mapper.PaymentPersistenceMapper;
 import jakarta.persistence.EntityManager;
@@ -10,12 +8,12 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-@Component
+@Repository
 @Transactional(readOnly = true)
-public class PaymentRepositoryImpl implements PaymentRepository {
+public class PaymentRepositoryImpl {
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -28,7 +26,6 @@ public class PaymentRepositoryImpl implements PaymentRepository {
         this.paymentPersistenceMapper = paymentPersistenceMapper;
     }
 
-    @Override
     @Transactional
     public Payment save(Payment payment) {
         PaymentEntity entity = paymentPersistenceMapper.toEntity(payment);
@@ -42,14 +39,12 @@ public class PaymentRepositoryImpl implements PaymentRepository {
         }
     }
 
-    @Override
     public Optional<Payment> findById(Long paymentId) {
         PaymentEntity entity = entityManager.find(PaymentEntity.class, paymentId);
         return Optional.ofNullable(entity)
                 .map(paymentPersistenceMapper::toDomain);
     }
 
-    @Override
     public Optional<Payment> findByBookingId(Long bookingId) {
         TypedQuery<PaymentEntity> query = entityManager.createQuery(
                 "SELECT p FROM PaymentEntity p WHERE p.bookingId = :bookingId",
@@ -61,7 +56,6 @@ public class PaymentRepositoryImpl implements PaymentRepository {
                 .map(paymentPersistenceMapper::toDomain);
     }
 
-    @Override
     public Optional<Payment> findBySessionId(String sessionId) {
         TypedQuery<PaymentEntity> query = entityManager.createQuery(
                 "SELECT p FROM PaymentEntity p WHERE p.sessionId = :sessionId",
@@ -73,7 +67,6 @@ public class PaymentRepositoryImpl implements PaymentRepository {
                 .map(paymentPersistenceMapper::toDomain);
     }
 
-    @Override
     public List<Payment> findAllByFilter(PaymentFilterQuery query) {
         if (query.userId() == null) {
             TypedQuery<PaymentEntity> jpqlQuery = entityManager.createQuery(

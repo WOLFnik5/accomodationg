@@ -3,9 +3,9 @@ package com.bookingapp.domain.service.accommodation;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.bookingapp.persistence.AccommodationRepositoryImpl;
 import com.bookingapp.service.AccommodationService;
 import com.bookingapp.infrastructure.kafka.KafkaEventPublisher;
-import com.bookingapp.domain.repository.AccommodationRepository;
 import com.bookingapp.domain.model.enums.AccommodationType;
 import com.bookingapp.exception.BusinessValidationException;
 import com.bookingapp.exception.EntityNotFoundDomainException;
@@ -25,7 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class AccommodationServiceTest {
 
     @Mock
-    private AccommodationRepository accommodationRepository;
+    private AccommodationRepositoryImpl accommodationRepository;
 
     @Mock
     private KafkaEventPublisher kafkaEventPublisher;

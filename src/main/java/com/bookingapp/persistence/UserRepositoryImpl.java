@@ -1,19 +1,18 @@
 package com.bookingapp.persistence;
 
 import com.bookingapp.domain.model.User;
-import com.bookingapp.domain.repository.UserRepository;
 import com.bookingapp.persistence.entity.UserEntity;
 import com.bookingapp.persistence.mapper.UserPersistenceMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import java.util.Optional;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-@Component
+@Repository
 @Transactional(readOnly = true)
-public class UserRepositoryImpl implements UserRepository {
+public class UserRepositoryImpl {
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -26,7 +25,6 @@ public class UserRepositoryImpl implements UserRepository {
         this.userPersistenceMapper = userPersistenceMapper;
     }
 
-    @Override
     @Transactional
     public User save(User user) {
         UserEntity entity = userPersistenceMapper.toEntity(user);
@@ -40,14 +38,12 @@ public class UserRepositoryImpl implements UserRepository {
         }
     }
 
-    @Override
     public Optional<User> findById(Long userId) {
         UserEntity entity = entityManager.find(UserEntity.class, userId);
         return Optional.ofNullable(entity)
                 .map(userPersistenceMapper::toDomain);
     }
 
-    @Override
     public Optional<User> findByEmail(String email) {
         TypedQuery<UserEntity> query = entityManager.createQuery(
                 "SELECT u FROM UserEntity u WHERE u.email = :email",
@@ -59,7 +55,6 @@ public class UserRepositoryImpl implements UserRepository {
                 .map(userPersistenceMapper::toDomain);
     }
 
-    @Override
     public boolean existsByEmail(String email) {
         TypedQuery<Long> query = entityManager.createQuery(
                 "SELECT COUNT(u) FROM UserEntity u WHERE u.email = :email",

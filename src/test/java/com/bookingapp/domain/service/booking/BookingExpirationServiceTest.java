@@ -2,7 +2,7 @@ package com.bookingapp.domain.service.booking;
 
 import com.bookingapp.domain.model.enums.BookingStatus;
 import com.bookingapp.domain.model.Booking;
-import com.bookingapp.domain.repository.BookingRepository;
+import com.bookingapp.persistence.BookingRepositoryImpl;
 import com.bookingapp.service.BookingExpirationService;
 import com.bookingapp.service.BookingExpirationResult;
 import com.bookingapp.infrastructure.kafka.KafkaEventPublisher;
@@ -27,7 +27,7 @@ import static org.mockito.Mockito.when;
 class BookingExpirationServiceTest {
 
     @Mock
-    private BookingRepository bookingRepository;
+    private BookingRepositoryImpl bookingRepository;
 
     @Mock
     private KafkaEventPublisher kafkaEventPublisher;

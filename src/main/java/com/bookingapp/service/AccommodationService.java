@@ -2,10 +2,10 @@ package com.bookingapp.service;
 
 import com.bookingapp.domain.model.Accommodation;
 import com.bookingapp.domain.model.enums.AccommodationType;
-import com.bookingapp.domain.repository.AccommodationRepository;
 import com.bookingapp.exception.BusinessValidationException;
 import com.bookingapp.exception.EntityNotFoundDomainException;
 import com.bookingapp.infrastructure.kafka.KafkaEventPublisher;
+import com.bookingapp.persistence.AccommodationRepositoryImpl;
 import com.bookingapp.web.dto.PatchAccommodationRequest;
 import java.math.BigDecimal;
 import java.util.List;
@@ -16,11 +16,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class AccommodationService {
 
-    private final AccommodationRepository accommodationRepository;
+    private final AccommodationRepositoryImpl accommodationRepository;
     private final KafkaEventPublisher kafkaEventPublisher;
 
     public AccommodationService(
-            AccommodationRepository accommodationRepository,
+            AccommodationRepositoryImpl accommodationRepository,
             KafkaEventPublisher kafkaEventPublisher
     ) {
         this.accommodationRepository = accommodationRepository;

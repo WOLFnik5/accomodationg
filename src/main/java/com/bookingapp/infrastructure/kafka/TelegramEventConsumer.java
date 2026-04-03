@@ -5,6 +5,7 @@ import com.bookingapp.domain.event.BookingCanceledEvent;
 import com.bookingapp.domain.event.BookingCreatedEvent;
 import com.bookingapp.domain.event.BookingExpiredEvent;
 import com.bookingapp.domain.event.PaymentSucceededEvent;
+import com.bookingapp.infrastructure.telegram.TelegramMessageFormatter;
 import com.bookingapp.infrastructure.telegram.TelegramNotificationService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,16 +17,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class TelegramEventConsumer {
     private final ObjectMapper objectMapper;
-    private final TelegramEventMessageFormatter telegramEventMessageFormatter;
+    private final TelegramMessageFormatter telegramMessageFormatter;
     private final TelegramNotificationService telegramNotificationService;
 
     public TelegramEventConsumer(
             ObjectMapper objectMapper,
-            TelegramEventMessageFormatter telegramEventMessageFormatter,
+            TelegramMessageFormatter telegramMessageFormatter,
             TelegramNotificationService telegramNotificationService
     ) {
         this.objectMapper = objectMapper;
-        this.telegramEventMessageFormatter = telegramEventMessageFormatter;
+        this.telegramMessageFormatter = telegramMessageFormatter;
         this.telegramNotificationService = telegramNotificationService;
     }
 
@@ -37,7 +38,7 @@ public class TelegramEventConsumer {
     public void consumeBookingCreated(String payload) {
         BookingCreatedEvent event = readValue(payload, BookingCreatedEvent.class);
         telegramNotificationService
-                .sendMessage(telegramEventMessageFormatter.formatBookingCreatedEvent(event));
+                .sendMessage(telegramMessageFormatter.formatBookingCreatedEvent(event));
     }
 
     @KafkaListener(
@@ -48,7 +49,7 @@ public class TelegramEventConsumer {
     public void consumeBookingCanceled(String payload) {
         BookingCanceledEvent event = readValue(payload, BookingCanceledEvent.class);
         telegramNotificationService
-                .sendMessage(telegramEventMessageFormatter.formatBookingCanceledEvent(event));
+                .sendMessage(telegramMessageFormatter.formatBookingCanceledEvent(event));
     }
 
     @KafkaListener(
@@ -59,7 +60,7 @@ public class TelegramEventConsumer {
     public void consumeAccommodationCreated(String payload) {
         AccommodationCreatedEvent event = readValue(payload, AccommodationCreatedEvent.class);
         telegramNotificationService.sendMessage(
-                telegramEventMessageFormatter.formatAccommodationCreatedEvent(event)
+                telegramMessageFormatter.formatAccommodationCreatedEvent(event)
         );
     }
 
@@ -71,7 +72,7 @@ public class TelegramEventConsumer {
     public void consumePaymentSucceeded(String payload) {
         PaymentSucceededEvent event = readValue(payload, PaymentSucceededEvent.class);
         telegramNotificationService.sendMessage(
-                telegramEventMessageFormatter.formatPaymentSucceededEvent(event)
+                telegramMessageFormatter.formatPaymentSucceededEvent(event)
         );
     }
 
@@ -83,7 +84,7 @@ public class TelegramEventConsumer {
     public void consumeBookingExpired(String payload) {
         BookingExpiredEvent event = readValue(payload, BookingExpiredEvent.class);
         telegramNotificationService.sendMessage(
-                telegramEventMessageFormatter.formatBookingExpiredEvent(event)
+                telegramMessageFormatter.formatBookingExpiredEvent(event)
         );
     }
 

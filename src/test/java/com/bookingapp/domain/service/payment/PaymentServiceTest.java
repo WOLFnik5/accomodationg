@@ -1,17 +1,17 @@
 package com.bookingapp.domain.service.payment;
 
 import com.bookingapp.infrastructure.security.CurrentUser;
-import com.bookingapp.domain.repository.PaymentFilterQuery;
+import com.bookingapp.persistence.PaymentFilterQuery;
 import com.bookingapp.web.dto.PaymentSessionResult;
 import com.bookingapp.service.PaymentService;
 import com.bookingapp.exception.PaymentStateException;
 import com.bookingapp.infrastructure.kafka.KafkaEventPublisher;
-import com.bookingapp.domain.repository.AccommodationRepository;
-import com.bookingapp.domain.repository.BookingRepository;
-import com.bookingapp.domain.repository.PaymentRepository;
-import com.bookingapp.domain.repository.UserRepository;
 import com.bookingapp.infrastructure.security.CurrentUserService;
 import com.bookingapp.infrastructure.stripe.StripePaymentProvider;
+import com.bookingapp.persistence.AccommodationRepositoryImpl;
+import com.bookingapp.persistence.BookingRepositoryImpl;
+import com.bookingapp.persistence.PaymentRepositoryImpl;
+import com.bookingapp.persistence.UserRepositoryImpl;
 import com.bookingapp.domain.model.enums.AccommodationType;
 import com.bookingapp.domain.model.enums.BookingStatus;
 import com.bookingapp.domain.model.enums.PaymentStatus;
@@ -44,16 +44,16 @@ import static org.mockito.Mockito.when;
 class PaymentServiceTest {
 
     @Mock
-    private PaymentRepository paymentRepository;
+    private PaymentRepositoryImpl paymentRepository;
 
     @Mock
-    private BookingRepository bookingRepository;
+    private BookingRepositoryImpl bookingRepository;
 
     @Mock
-    private AccommodationRepository accommodationRepository;
+    private AccommodationRepositoryImpl accommodationRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private UserRepositoryImpl userRepository;
 
     @Mock
     private CurrentUserService currentUserService;

@@ -1,8 +1,8 @@
 package com.bookingapp.domain.service.user;
 
 import com.bookingapp.infrastructure.security.CurrentUser;
+import com.bookingapp.persistence.UserRepositoryImpl;
 import com.bookingapp.service.UserService;
-import com.bookingapp.domain.repository.UserRepository;
 import com.bookingapp.infrastructure.security.CurrentUserService;
 import com.bookingapp.domain.model.enums.UserRole;
 import com.bookingapp.exception.BusinessValidationException;
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 class UserServiceTest {
 
     @Mock
-    private UserRepository userRepository;
+    private UserRepositoryImpl userRepository;
 
     @Mock
     private CurrentUserService currentUserService;
